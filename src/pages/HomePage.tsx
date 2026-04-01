@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, Sparkles, TrendingUp } from 'lucide-react';
-import { topPicks, trendingBooks, genres } from '@/data/seedData';
-import { BookCard, TrendingBookCard } from '@/components/BookCard';
+import { topPicks, trendingBooks, genres, TrendingBook } from '@/data/seedData';
+import { TrendingBookCard } from '@/components/BookCard';
 import { motion } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -22,6 +22,7 @@ const fadeUp = {
 };
 
 export default function HomePage() {
+  const [selectedBook, setSelectedBook] = useState<TrendingBook | null>(null);
   const [genreFilter, setGenreFilter] = useState('All');
 
   const filterByGenre = (books: typeof topPicks) =>
@@ -62,7 +63,7 @@ export default function HomePage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           {topPicks.map((book, i) => (
             <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
-              <TrendingBookCard book={book} />
+              <TrendingBookCard book={book} onClick={() => setSelectedBook(book)} />
             </motion.div>
           ))}
         </div>
@@ -99,13 +100,46 @@ export default function HomePage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
               {filtered.map((book, i) => (
                 <motion.div key={book.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-                  <TrendingBookCard book={book} />
+                  <TrendingBookCard book={book} onClick={() => setSelectedBook(book)} />
                 </motion.div>
               ))}
             </div>
           </section>
         );
       })}
+          {selectedBook && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl relative">
+            <button
+              onClick={() => setSelectedBook(null)}
+              className="absolute top-3 right-3 rounded-full px-2 py-1 text-sm text-muted-foreground hover:bg-muted"
+            >
+              ✕
+            </button>
+
+            <img
+              src={selectedBook.coverUrl}
+              alt={selectedBook.title}
+              className="mx-auto mb-4 h-64 w-auto rounded-xl object-cover"
+            />
+
+            <h2 className="text-xl font-semibold text-foreground">
+              {selectedBook.title}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {selectedBook.author}
+            </p>
+
+            <p className="text-sm font-medium mt-3 text-foreground">
+              Goodreads: {selectedBook.goodreadsRating ?? 'N/A'}
+            </p>
+
+            <p className="text-sm text-muted-foreground mt-4 leading-6">
+              {selectedBook.review || selectedBook.reason}
+            </p>
+         </div>
+        </div>
+      )}
     </div>
   );
 }
