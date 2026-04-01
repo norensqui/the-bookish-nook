@@ -1,4 +1,4 @@
-import { Star, Heart, ExternalLink } from 'lucide-react';
+import { Star, Heart, Quote } from 'lucide-react';
 import { TrendingBook } from '@/data/seedData';
 import { motion } from 'framer-motion';
 
@@ -13,6 +13,8 @@ interface BookCardProps {
   onClick?: () => void;
   variant?: 'default' | 'trending' | 'compact';
   progress?: number;
+  moodQuote?: string;
+  showRating?: boolean;
 }
 
 export function BookCard({
@@ -26,6 +28,8 @@ export function BookCard({
   onClick,
   variant = 'default',
   progress,
+  moodQuote,
+  showRating = false,
 }: BookCardProps) {
   return (
     <motion.div
@@ -66,7 +70,7 @@ export function BookCard({
           {reason && (
             <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 italic">"{reason}"</p>
           )}
-          {rating !== undefined && rating > 0 && (
+          {showRating && rating !== undefined && rating > 0 && (
             <div className="flex items-center gap-0.5 mt-2">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
@@ -75,6 +79,12 @@ export function BookCard({
                 />
               ))}
               <span className="text-xs text-muted-foreground ml-1">{rating}</span>
+            </div>
+          )}
+          {moodQuote && (
+            <div className="flex items-start gap-1 mt-2 text-accent-foreground/80">
+              <Quote className="h-3 w-3 mt-0.5 shrink-0" />
+              <p className="text-[10px] italic line-clamp-2">{moodQuote}</p>
             </div>
           )}
         </div>
