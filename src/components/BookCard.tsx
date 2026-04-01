@@ -78,7 +78,7 @@ export function BookCard({
                   className={`h-3 w-3 ${i < Math.floor(rating) ? 'fill-primary/70 text-primary/70' : 'text-border'}`}
                 />
               ))}
-              <span className="text-xs text-muted-foreground ml-1">{rating}</span>
+              <span className="text-xs text-muted-foreground ml-1">Goodreads {rating}</span>
             </div>
           )}
           {moodQuote && (
@@ -93,14 +93,23 @@ export function BookCard({
   );
 }
 
-export function TrendingBookCard({ book }: { book: TrendingBook }) {
+export function TrendingBookCard({
+  book,
+  onClick,
+}: {
+  book: TrendingBook;
+  onClick?: () => void;
+}) {
   return (
     <BookCard
       title={book.title}
       author={book.author}
       coverUrl={book.coverUrl}
       reason={book.reason}
+      rating={book.goodreadsRating}
+      showRating={true}
       variant="trending"
+      onClick={onClick}
     />
   );
 }
