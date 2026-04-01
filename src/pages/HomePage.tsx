@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, Sparkles, TrendingUp } from 'lucide-react';
 import { topPicks, trendingBooks, genres, TrendingBook } from '@/data/seedData';
-import { TrendingBookCard, BookCover } from '@/components/BookCard';
+import { TrendingBookCard } from '@/components/BookCard';
 import { motion } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -63,7 +63,12 @@ export default function HomePage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           {topPicks.map((book, i) => (
             <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
-              <TrendingBookCard book={book} onClick={() => setSelectedBook(book)} />
+              <TrendingBookCard
+  book={book}
+  onClick={(resolvedCoverUrl) =>
+    setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
+  }
+/>
             </motion.div>
           ))}
         </div>
@@ -100,7 +105,12 @@ export default function HomePage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
               {filtered.map((book, i) => (
                 <motion.div key={book.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-                  <TrendingBookCard book={book} onClick={() => setSelectedBook(book)} />
+                  <TrendingBookCard
+  book={book}
+  onClick={(resolvedCoverUrl) =>
+    setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
+  }
+/>
                 </motion.div>
               ))}
             </div>
