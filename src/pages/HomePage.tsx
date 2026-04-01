@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, Sparkles, TrendingUp } from 'lucide-react';
 import { topPicks, trendingBooks, genres, TrendingBook } from '@/data/seedData';
-import { TrendingBookCard } from '@/components/BookCard';
+import { TrendingBookCard, BookCover } from '@/components/BookCard';
 import { motion } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -117,11 +117,13 @@ export default function HomePage() {
               ✕
             </button>
 
-            <img
-              src={selectedBook.coverUrl}
-              alt={selectedBook.title}
-              className="mx-auto mb-4 h-64 w-auto rounded-xl object-cover"
-            />
+           <div className="mx-auto mb-4 h-64 w-40 overflow-hidden rounded-xl">
+  <BookCover
+    title={selectedBook.title}
+    author={selectedBook.author}
+    coverUrl={selectedBook.coverUrl}
+  />
+</div>
 
             <h2 className="text-xl font-semibold text-foreground">
               {selectedBook.title}
