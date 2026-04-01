@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useBooks } from '@/context/BookContext';
 import { BookCard } from '@/components/BookCard';
-import { Book } from '@/data/seedData';
+import { Book, getMoodQuote, genres } from '@/data/seedData';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen, BookCheck, Heart, Search, Plus, Trash2, Edit, ArrowRight,
-  BarChart3, Flame, Calendar, Clock, FileText, Star, X
+  BarChart3, Flame, Calendar, Clock, FileText, Star, X, Quote
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -25,13 +25,27 @@ const tabs = [
 const defaultNewBook: Omit<Book, 'id'> = {
   title: '', author: '', authorBio: '', description: '', coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=450&fit=crop',
   rating: 0, notes: '', startDate: '', finishDate: '', status: 'wishlist', totalPages: 0, currentPage: 0, isFavorite: false,
+  genre: '', mood: '',
 };
+
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map(star => (
+        <button key={star} type="button" onClick={() => onChange(star === value ? 0 : star)} className="p-0.5">
+          <Star className={`h-5 w-5 transition-colors ${star <= value ? 'fill-primary/70 text-primary/70' : 'text-border hover:text-primary/40'}`} />
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function LibraryPage() {
   const { books, readingLogs, addBook, updateBook, deleteBook, moveBook, toggleFavorite, addReadingLog } = useBooks();
   const [activeTab, setActiveTab] = useState<'read' | 'reading' | 'wishlist' | 'tracker'>('reading');
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('title');
+  const [ratingFilter, setRatingFilter] = useState('all');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newBook, setNewBook] = useState(defaultNewBook);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
@@ -41,6 +55,7 @@ export default function LibraryPage() {
   const filteredBooks = books
     .filter(b => activeTab === 'tracker' ? b.status === 'reading' : b.status === activeTab)
     .filter(b => b.title.toLowerCase().includes(search.toLowerCase()) || b.author.toLowerCase().includes(search.toLowerCase()))
+    .filter(b => ratingFilter === 'all' ? true : ratingFilter === 'highest' ? b.rating >= 4 : true)
     .sort((a, b) => sortBy === 'title' ? a.title.localeCompare(b.title) : sortBy === 'author' ? a.author.localeCompare(b.author) : b.rating - a.rating);
 
   const readingBooks = books.filter(b => b.status === 'reading');
@@ -52,7 +67,15 @@ export default function LibraryPage() {
   };
 
   const handleEditSave = () => {
-    if (editingBook) { updateBook(editingBook.id, editingBook); setEditingBook(null); }
+    if (editingBook) {
+      // Generate mood quote when rating
+      let moodQuote = editingBook.moodQuote;
+      if (editingBook.rating > 0 && !moodQuote) {
+        moodQuote = getMoodQuote(editingBook.rating, editingBook.genre, editingBook.mood);
+      }
+      updateBook(editingBook.id, { ...editingBook, moodQuote });
+      setEditingBook(null);
+    }
   };
 
   const handleAddLog = () => {
@@ -113,6 +136,13 @@ export default function LibraryPage() {
                 <SelectItem value="rating">Sort by Rating</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={ratingFilter} onValueChange={setRatingFilter}>
+              <SelectTrigger className="w-40 bg-card border-border/50 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Ratings</SelectItem>
+                <SelectItem value="highest">4+ Stars</SelectItem>
+              </SelectContent>
+            </Select>
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90"><Plus className="h-4 w-4" />Add Book</Button>
@@ -122,12 +152,21 @@ export default function LibraryPage() {
                 <div className="space-y-4 mt-4">
                   <div><Label>Title</Label><Input value={newBook.title} onChange={e => setNewBook({...newBook, title: e.target.value})} className="bg-background/50 rounded-xl" /></div>
                   <div><Label>Author</Label><Input value={newBook.author} onChange={e => setNewBook({...newBook, author: e.target.value})} className="bg-background/50 rounded-xl" /></div>
+                  <div><Label>Genre</Label>
+                    <Select value={newBook.genre || ''} onValueChange={v => setNewBook({...newBook, genre: v})}>
+                      <SelectTrigger className="bg-background/50 rounded-xl"><SelectValue placeholder="Select genre" /></SelectTrigger>
+                      <SelectContent>{genres.filter(g => g !== 'All').map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
                   <div><Label>Author Bio</Label><Textarea value={newBook.authorBio} onChange={e => setNewBook({...newBook, authorBio: e.target.value})} className="bg-background/50 rounded-xl" /></div>
                   <div><Label>Description</Label><Textarea value={newBook.description} onChange={e => setNewBook({...newBook, description: e.target.value})} className="bg-background/50 rounded-xl" /></div>
                   <div><Label>Cover URL</Label><Input value={newBook.coverUrl} onChange={e => setNewBook({...newBook, coverUrl: e.target.value})} className="bg-background/50 rounded-xl" /></div>
                   <div className="grid grid-cols-2 gap-4">
                     <div><Label>Total Pages</Label><Input type="number" value={newBook.totalPages} onChange={e => setNewBook({...newBook, totalPages: +e.target.value})} className="bg-background/50 rounded-xl" /></div>
-                    <div><Label>Rating (0-5)</Label><Input type="number" min={0} max={5} step={0.5} value={newBook.rating} onChange={e => setNewBook({...newBook, rating: +e.target.value})} className="bg-background/50 rounded-xl" /></div>
+                    <div>
+                      <Label>Rating (private)</Label>
+                      <StarRating value={newBook.rating} onChange={v => setNewBook({...newBook, rating: v})} />
+                    </div>
                   </div>
                   <div><Label>Notes</Label><Textarea value={newBook.notes} onChange={e => setNewBook({...newBook, notes: e.target.value})} className="bg-background/50 rounded-xl" /></div>
                   <div className="grid grid-cols-2 gap-4">
@@ -162,6 +201,8 @@ export default function LibraryPage() {
                         onFavoriteToggle={() => toggleFavorite(book.id)}
                         onClick={() => setEditingBook(book)}
                         progress={book.totalPages > 0 ? (book.currentPage / book.totalPages) * 100 : undefined}
+                        moodQuote={book.moodQuote}
+                        showRating={true}
                       />
                       <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         <button onClick={() => deleteBook(book.id)} className="p-1.5 rounded-full bg-destructive/80 text-destructive-foreground backdrop-blur-sm">
@@ -313,14 +354,37 @@ export default function LibraryPage() {
                   <div className="mt-2"><Label>Author</Label><Input value={editingBook.author} onChange={e => setEditingBook({...editingBook, author: e.target.value})} className="bg-background/50 rounded-xl" /></div>
                 </div>
               </div>
+              <div><Label>Genre</Label>
+                <Select value={editingBook.genre || ''} onValueChange={v => setEditingBook({...editingBook, genre: v})}>
+                  <SelectTrigger className="bg-background/50 rounded-xl"><SelectValue placeholder="Select genre" /></SelectTrigger>
+                  <SelectContent>{genres.filter(g => g !== 'All').map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
               <div><Label>Author Bio</Label><Textarea value={editingBook.authorBio} onChange={e => setEditingBook({...editingBook, authorBio: e.target.value})} className="bg-background/50 rounded-xl" /></div>
               <div><Label>Description</Label><Textarea value={editingBook.description} onChange={e => setEditingBook({...editingBook, description: e.target.value})} className="bg-background/50 rounded-xl" /></div>
               <div><Label>Cover URL</Label><Input value={editingBook.coverUrl} onChange={e => setEditingBook({...editingBook, coverUrl: e.target.value})} className="bg-background/50 rounded-xl" /></div>
               <div className="grid grid-cols-3 gap-4">
-                <div><Label>Rating</Label><Input type="number" min={0} max={5} step={0.5} value={editingBook.rating} onChange={e => setEditingBook({...editingBook, rating: +e.target.value})} className="bg-background/50 rounded-xl" /></div>
+                <div>
+                  <Label>Rating (private)</Label>
+                  <StarRating value={editingBook.rating} onChange={v => {
+                    const moodQuote = v > 0 ? getMoodQuote(v, editingBook.genre, editingBook.mood) : '';
+                    setEditingBook({...editingBook, rating: v, moodQuote});
+                  }} />
+                </div>
                 <div><Label>Current Page</Label><Input type="number" value={editingBook.currentPage} onChange={e => setEditingBook({...editingBook, currentPage: +e.target.value})} className="bg-background/50 rounded-xl" /></div>
                 <div><Label>Total Pages</Label><Input type="number" value={editingBook.totalPages} onChange={e => setEditingBook({...editingBook, totalPages: +e.target.value})} className="bg-background/50 rounded-xl" /></div>
               </div>
+
+              {/* Mood Quote Display */}
+              {editingBook.moodQuote && (
+                <div className="glass-card p-3 bg-accent/20 border-accent/30">
+                  <div className="flex items-start gap-2">
+                    <Quote className="h-4 w-4 text-accent-foreground mt-0.5 shrink-0" />
+                    <p className="text-sm text-accent-foreground italic font-body">{editingBook.moodQuote}</p>
+                  </div>
+                </div>
+              )}
+
               <div><Label>Notes</Label><Textarea value={editingBook.notes} onChange={e => setEditingBook({...editingBook, notes: e.target.value})} className="bg-background/50 rounded-xl" /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Start Date</Label><Input type="date" value={editingBook.startDate} onChange={e => setEditingBook({...editingBook, startDate: e.target.value})} className="bg-background/50 rounded-xl" /></div>

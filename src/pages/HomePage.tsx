@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { BookOpen, Sparkles, TrendingUp } from 'lucide-react';
-import { topPicks, trendingBooks } from '@/data/seedData';
+import { topPicks, trendingBooks, genres } from '@/data/seedData';
 import { BookCard, TrendingBookCard } from '@/components/BookCard';
 import { motion } from 'framer-motion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const platformIcons: Record<string, { label: string; color: string }> = {
   tiktok: { label: 'TikTok', color: 'bg-rose' },
@@ -20,6 +22,11 @@ const fadeUp = {
 };
 
 export default function HomePage() {
+  const [genreFilter, setGenreFilter] = useState('All');
+
+  const filterByGenre = (books: typeof topPicks) =>
+    genreFilter === 'All' ? books : books.filter(b => b.genre === genreFilter);
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-12">
       {/* Hero */}
@@ -48,9 +55,10 @@ export default function HomePage() {
       <section>
         <div className="flex items-center gap-2 mb-5">
           <Sparkles className="h-5 w-5 text-primary" />
-          <h2 className="section-title">Top 5 Picks of the Week</h2>
+          <h2 className="section-title">Top Picks of the Week</h2>
+          <span className="soft-badge bg-accent/40 text-accent-foreground ml-2">Readers 15–35</span>
         </div>
-        <p className="text-sm text-muted-foreground mb-6">Selected by creators around the world</p>
+        <p className="text-sm text-muted-foreground mb-6">Selected by creators and readers around the world</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           {topPicks.map((book, i) => (
             <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
@@ -60,25 +68,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trending by Platform */}
-      {Object.entries(trendingBooks).map(([platform, books]) => (
-        <section key={platform}>
-          <div className="flex items-center gap-3 mb-5">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            <h2 className="section-title">Trending on {platformIcons[platform]?.label}</h2>
-            <span className={`soft-badge ${platformIcons[platform]?.color} text-foreground`}>
-              Top 5
-            </span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {books.map((book, i) => (
-              <motion.div key={book.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-                <TrendingBookCard book={book} />
-              </motion.div>
+      {/* Genre Filter for Trending */}
+      <div className="flex items-center gap-3">
+        <TrendingUp className="h-5 w-5 text-primary" />
+        <h2 className="section-title">Trending by Platform</h2>
+        <Select value={genreFilter} onValueChange={setGenreFilter}>
+          <SelectTrigger className="w-44 bg-card border-border/50 rounded-xl ml-auto">
+            <SelectValue placeholder="Filter by genre" />
+          </SelectTrigger>
+          <SelectContent>
+            {genres.filter(g => g !== 'Custom').map(g => (
+              <SelectItem key={g} value={g}>{g}</SelectItem>
             ))}
-          </div>
-        </section>
-      ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Trending by Platform */}
+      {Object.entries(trendingBooks).map(([platform, books]) => {
+        const filtered = filterByGenre(books);
+        if (filtered.length === 0) return null;
+        return (
+          <section key={platform}>
+            <div className="flex items-center gap-3 mb-5">
+              <h3 className="font-display text-lg font-semibold text-foreground">Trending on {platformIcons[platform]?.label}</h3>
+              <span className={`soft-badge ${platformIcons[platform]?.color} text-foreground`}>
+                Top {filtered.length}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              {filtered.map((book, i) => (
+                <motion.div key={book.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
+                  <TrendingBookCard book={book} />
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
