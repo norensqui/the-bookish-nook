@@ -26,6 +26,8 @@ export interface TrendingBook {
   reason: string;
   platform: string;
   genre?: string;
+  goodreadsRating?: number;
+  review?: string;
 }
 
 export interface ReadingLog {
