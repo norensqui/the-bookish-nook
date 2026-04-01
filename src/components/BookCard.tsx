@@ -11,7 +11,7 @@ interface BookCardProps {
   rating?: number;
   isFavorite?: boolean;
   onFavoriteToggle?: () => void;
-  onClick?: () => void;
+  onClick?: (resolvedCoverUrl: string) => void;
   variant?: 'default' | 'trending' | 'compact';
   progress?: number;
   moodQuote?: string;
@@ -22,10 +22,12 @@ export function BookCover({
   title,
   author,
   coverUrl,
+  onResolved,
 }: {
   title: string;
   author: string;
   coverUrl: string;
+  onResolved?: (url: string) => void;
 }) {
   const [resolvedCover, setResolvedCover] = useState<string>(coverUrl);
 
@@ -35,6 +37,7 @@ export function BookCover({
 
     if (!isPlaceholder) {
       setResolvedCover(coverUrl);
+      onResolved?.(coverUrl);
       return;
     }
 
@@ -42,7 +45,6 @@ export function BookCover({
 
     async function fetchCover() {
       try {
-        const query = encodeURIComponent(`${title} ${author}`);
         const res = await fetch(
           `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(
             title
@@ -57,17 +59,22 @@ export function BookCover({
           item?.volumeInfo?.imageLinks?.smallThumbnail;
 
         if (image) {
-          setResolvedCover(image.replace('http://', 'https://'));
+          const secureImage = image.replace('http://', 'https://');
+          setResolvedCover(secureImage);
+          onResolved?.(secureImage);
+        } else {
+          onResolved?.(coverUrl);
         }
       } catch (error) {
         console.error('Failed to fetch cover:', error);
+        onResolved?.(coverUrl);
       }
     }
 
     fetchCover();
 
     return () => controller.abort();
-  }, [title, author, coverUrl]);
+  }, [title, author, coverUrl, onResolved]);
 
   return (
     <img
@@ -92,16 +99,23 @@ export function BookCard({
   moodQuote,
   showRating = false,
 }: BookCardProps) {
+  const [resolvedCoverUrl, setResolvedCoverUrl] = useState(coverUrl);
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
       className="group cursor-pointer"
-      onClick={onClick}
+      onClick={() => onClick?.(resolvedCoverUrl)}
     >
       <div className="glass-card overflow-hidden">
         <div className="relative aspect-[2/3] overflow-hidden rounded-t-2xl">
-          <BookCover title={title} author={author} coverUrl={coverUrl} />
+          <BookCover
+            title={title}
+            author={author}
+            coverUrl={coverUrl}
+            onResolved={setResolvedCoverUrl}
+          />
 
           {onFavoriteToggle && (
             <button
@@ -178,7 +192,7 @@ export function TrendingBookCard({
   onClick,
 }: {
   book: TrendingBook;
-  onClick?: () => void;
+  onClick?: (resolvedCoverUrl: string) => void;
 }) {
   return (
     <BookCard
