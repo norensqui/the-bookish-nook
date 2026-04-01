@@ -18,7 +18,7 @@ interface BookCardProps {
   showRating?: boolean;
 }
 
-function BookCover({
+export function BookCover({
   title,
   author,
   coverUrl,
