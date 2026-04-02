@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BookOpen, Sparkles, TrendingUp } from 'lucide-react';
-import { topPicks, trendingBooks, genres, TrendingBook } from '@/data/seedData';
+import { trendingBooks, genres, TrendingBook } from '@/data/seedData';
 import { TrendingBookCard, BookCover } from '@/components/BookCard';
 import { motion } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,10 +22,62 @@ const fadeUp = {
 };
 
 export default function HomePage() {
+  const [weeklyTopBooks, setWeeklyTopBooks] = useState<TrendingBook[]>([]);
+  const [isLoadingTopBooks, setIsLoadingTopBooks] = useState(true);
   const [selectedBook, setSelectedBook] = useState<TrendingBook | null>(null);
   const [genreFilter, setGenreFilter] = useState('All');
 
-  const filterByGenre = (books: typeof topPicks) =>
+    useEffect(() => {
+    async function fetchWeeklyTopBooks() {
+      try {
+        setIsLoadingTopBooks(true);
+
+        const today = new Date();
+        const weekNumber = Math.ceil(
+          ((today.getTime() - new Date(today.getFullYear(), 0, 1).getTime()) / 86400000 +
+            new Date(today.getFullYear(), 0, 1).getDay() + 1) / 7
+        );
+
+        const queryOptions = [
+          'subject:fiction',
+          'subject:romance',
+          'subject:fantasy',
+          'subject:mystery',
+          'subject:literary fiction',
+        ];
+
+        const query = queryOptions[weekNumber % queryOptions.length];
+
+        const res = await fetch(
+          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=newest&maxResults=10`
+        );
+
+        const data = await res.json();
+
+        const books: TrendingBook[] = (data.items || []).slice(0, 5).map((item: any, index: number) => ({
+          id: `weekly-${index}`,
+          title: item.volumeInfo?.title || 'Unknown Title',
+          author: item.volumeInfo?.authors?.[0] || 'Unknown Author',
+          coverUrl: item.volumeInfo?.imageLinks?.thumbnail || '',
+          reason: 'Trending this week',
+          platform: 'weekly',
+          genre: item.volumeInfo?.categories?.[0] || 'Fiction',
+          goodreadsRating: undefined,
+          review: item.volumeInfo?.description || 'Popular this week based on current discovery results.',
+        }));
+
+        setWeeklyTopBooks(books);
+      } catch (error) {
+        console.error('Failed to fetch weekly top books:', error);
+        setWeeklyTopBooks([]);
+      } finally {
+        setIsLoadingTopBooks(false);
+      }
+    }
+
+    fetchWeeklyTopBooks();
+  }, []);
+  const filterByGenre = (books: TrendingBook[]) =>
     genreFilter === 'All' ? books : books.filter(b => b.genre === genreFilter);
 
   return (
@@ -60,18 +112,22 @@ export default function HomePage() {
           <span className="soft-badge bg-accent/40 text-accent-foreground ml-2">Readers 15–35</span>
         </div>
         <p className="text-sm text-muted-foreground mb-6">Selected by creators and readers around the world</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {topPicks.map((book, i) => (
-            <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
-              <TrendingBookCard
-  book={book}
-  onClick={(resolvedCoverUrl) =>
-    setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
-  }
-/>
-            </motion.div>
-          ))}
-        </div>
+        {isLoadingTopBooks ? (
+  <p className="text-sm text-muted-foreground">Loading this week’s books...</p>
+) : (
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+    {weeklyTopBooks.map((book, i) => (
+      <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
+        <TrendingBookCard
+          book={book}
+          onClick={(resolvedCoverUrl) =>
+            setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
+          }
+        />
+      </motion.div>
+    ))}
+  </div>
+)}
       </section>
 
       {/* Genre Filter for Trending */}
