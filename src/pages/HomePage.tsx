@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, Sparkles, TrendingUp } from 'lucide-react';
 import { topPicks, trendingBooks, genres, TrendingBook } from '@/data/seedData';
-import { TrendingBookCard } from '@/components/BookCard';
+import { TrendingBookCard, BookCover } from '@/components/BookCard';
 import { motion } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
