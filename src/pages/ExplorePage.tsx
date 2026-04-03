@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { exploreArticles, creatorPicks } from '@/data/seedData';
+import { useEffect, useState } from 'react';
+import { creatorPicks } from '@/data/seedData';
 import { motion } from 'framer-motion';
 import { Compass, ExternalLink, Sparkles, User } from 'lucide-react';
 
@@ -7,6 +7,8 @@ const categories = ['All', 'Author Interviews', 'Literary Essays', 'Book Reviews
 
 export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const filtered = activeCategory === 'All'
     ? exploreArticles
