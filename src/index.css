@@ -6,55 +6,55 @@
 
 @layer base {
   :root {
-    --background: 36 33% 97%;
-    --foreground: 30 10% 20%;
+    --background: 36 30% 94%;
+    --foreground: 28 12% 15%;
 
-    --card: 40 30% 96%;
-    --card-foreground: 30 10% 20%;
+    --card: 38 26% 92%;
+    --card-foreground: 28 12% 15%;
 
-    --popover: 36 33% 97%;
-    --popover-foreground: 30 10% 20%;
+    --popover: 36 30% 94%;
+    --popover-foreground: 28 12% 15%;
 
-    --primary: 24 20% 45%;
+    --primary: 24 22% 38%;
     --primary-foreground: 40 30% 97%;
 
-    --secondary: 30 20% 90%;
-    --secondary-foreground: 30 10% 25%;
+    --secondary: 30 18% 85%;
+    --secondary-foreground: 30 12% 20%;
 
-    --muted: 30 15% 92%;
-    --muted-foreground: 30 8% 50%;
+    --muted: 30 14% 88%;
+    --muted-foreground: 30 10% 42%;
 
-    --accent: 340 20% 85%;
-    --accent-foreground: 340 30% 30%;
+    --accent: 340 22% 80%;
+    --accent-foreground: 340 32% 25%;
 
-    --destructive: 0 60% 55%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 15% 88%;
-    --input: 30 15% 88%;
-    --ring: 24 20% 45%;
+    --border: 30 14% 82%;
+    --input: 30 14% 82%;
+    --ring: 24 22% 38%;
 
     --radius: 0.75rem;
 
-    --sage: 140 15% 80%;
-    --sage-foreground: 140 20% 25%;
-    --lavender: 260 20% 88%;
-    --lavender-foreground: 260 25% 30%;
-    --rose: 340 25% 88%;
-    --rose-foreground: 340 30% 30%;
-    --sand: 35 25% 85%;
-    --sand-foreground: 35 20% 30%;
-    --taupe: 30 10% 70%;
-    --cream: 40 40% 95%;
+    --sage: 140 16% 74%;
+    --sage-foreground: 140 22% 22%;
+    --lavender: 260 22% 83%;
+    --lavender-foreground: 260 28% 26%;
+    --rose: 340 26% 83%;
+    --rose-foreground: 340 32% 26%;
+    --sand: 35 22% 80%;
+    --sand-foreground: 35 22% 26%;
+    --taupe: 30 12% 62%;
+    --cream: 40 36% 91%;
 
-    --sidebar-background: 36 30% 95%;
-    --sidebar-foreground: 30 10% 30%;
-    --sidebar-primary: 24 20% 45%;
+    --sidebar-background: 36 26% 91%;
+    --sidebar-foreground: 28 12% 25%;
+    --sidebar-primary: 24 22% 38%;
     --sidebar-primary-foreground: 40 30% 97%;
-    --sidebar-accent: 30 20% 90%;
-    --sidebar-accent-foreground: 30 10% 25%;
-    --sidebar-border: 30 15% 88%;
-    --sidebar-ring: 24 20% 45%;
+    --sidebar-accent: 30 18% 85%;
+    --sidebar-accent-foreground: 30 12% 20%;
+    --sidebar-border: 30 14% 82%;
+    --sidebar-ring: 24 22% 38%;
 
     --font-display: 'Playfair Display', Georgia, serif;
     --font-body: 'Inter', system-ui, sans-serif;
@@ -95,6 +95,19 @@
 
   .soft-badge {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  /* Active/click state for interactive elements */
+  button:active,
+  [role="button"]:active,
+  a:active {
+    @apply scale-[0.98] brightness-95;
+    transition: all 0.1s ease;
+  }
+
+  .clickable-card:active {
+    @apply brightness-[0.97] scale-[0.99];
+    transition: all 0.1s ease;
   }
 }
 

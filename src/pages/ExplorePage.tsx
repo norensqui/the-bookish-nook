@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { creatorPicks, exploreArticles } from '@/data/seedData';
+import { BookCover } from '@/components/BookCard';
 import { motion } from 'framer-motion';
-import { Compass, ExternalLink, Sparkles, User } from 'lucide-react';
+import { Compass, ExternalLink, Sparkles, Newspaper } from 'lucide-react';
 
 const categories = ['All', 'Author Interviews', 'Literary Essays', 'Book Reviews', 'Book Recommendations', 'Literary News'];
 
 export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [articles, setArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const filtered = activeCategory === 'All'
     ? exploreArticles
@@ -49,8 +48,10 @@ export default function ExplorePage() {
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2">
                 {cp.books.map((book, bi) => (
-                  <div key={bi} className="min-w-[120px] flex-shrink-0">
-                    <img src={book.coverUrl} alt={book.title} className="w-full aspect-[2/3] object-cover rounded-lg" />
+                  <div key={bi} className="min-w-[110px] flex-shrink-0">
+                    <div className="w-full aspect-[2/3] overflow-hidden rounded-lg">
+                      <BookCover title={book.title} author={book.author} coverUrl={book.coverUrl} />
+                    </div>
                     <h4 className="font-display text-xs font-semibold text-foreground mt-2 line-clamp-1">{book.title}</h4>
                     <p className="text-[10px] text-muted-foreground">{book.author}</p>
                     <p className="text-[10px] text-muted-foreground italic mt-1 line-clamp-2">"{book.reason}"</p>
@@ -62,13 +63,19 @@ export default function ExplorePage() {
         </div>
       </section>
 
+      {/* Top Articles */}
+      <div className="flex items-center gap-2 mb-4">
+        <Newspaper className="h-5 w-5 text-primary" />
+        <h2 className="section-title">Top Articles This Week</h2>
+      </div>
+
       {/* Categories */}
       <div className="flex gap-2 mb-8 flex-wrap">
         {categories.map(cat => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-sm font-body transition-all ${
+            className={`px-4 py-2 rounded-xl text-sm font-body transition-all clickable-card ${
               activeCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary/60 text-muted-foreground hover:bg-secondary'
             }`}
           >
@@ -88,7 +95,7 @@ export default function ExplorePage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="glass-card overflow-hidden group book-card-hover block"
+            className="glass-card overflow-hidden group book-card-hover block clickable-card"
           >
             <div className="aspect-[16/10] overflow-hidden">
               <img

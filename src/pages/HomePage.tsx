@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Sparkles, TrendingUp } from 'lucide-react';
-import { trendingBooks, genres, TrendingBook } from '@/data/seedData';
+import { BookOpen, Sparkles, TrendingUp, Heart, Wand2 } from 'lucide-react';
+import { trendingBooks, genres, TrendingBook, moodVibes, moodRecommendations, weeklyRecommendations } from '@/data/seedData';
 import { TrendingBookCard, BookCover } from '@/components/BookCard';
 import { motion } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,27 +26,38 @@ export default function HomePage() {
   const [isLoadingTopBooks, setIsLoadingTopBooks] = useState(true);
   const [selectedBook, setSelectedBook] = useState<TrendingBook | null>(null);
   const [genreFilter, setGenreFilter] = useState('All');
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     async function fetchWeeklyTopBooks() {
       try {
         setIsLoadingTopBooks(true);
 
-        const today = new Date();
-        const weekNumber = Math.ceil(
-          ((today.getTime() - new Date(today.getFullYear(), 0, 1).getTime()) / 86400000 +
-            new Date(today.getFullYear(), 0, 1).getDay() + 1) / 7
-        );
-
-        const queryOptions = [
-          'subject:fiction',
-          'subject:romance',
-          'subject:fantasy',
-          'subject:mystery',
-          'subject:literary fiction',
-        ];
-
-        const query = queryOptions[weekNumber % queryOptions.length];
+        // Build query based on selected genre
+        let query = 'subject:fiction';
+        if (genreFilter !== 'All') {
+          const genreMap: Record<string, string> = {
+            'Romance': 'subject:romance',
+            'Fantasy': 'subject:fantasy',
+            'Thriller': 'subject:thriller',
+            'Mystery': 'subject:mystery',
+            'Literary Fiction': 'subject:literary fiction',
+            'Self-Help': 'subject:self-help',
+            'Classics': 'subject:classic literature',
+            'Science Fiction': 'subject:science fiction',
+            'Japanese Literature': 'subject:japanese fiction',
+            'Psychological Fiction': 'subject:psychological fiction',
+            'Philosophy': 'subject:philosophy',
+            'Young Adult': 'subject:young adult',
+            'Non-Fiction': 'subject:nonfiction',
+            'Horror': 'subject:horror',
+            'Memoir': 'subject:memoir',
+            'Historical Fiction': 'subject:historical fiction',
+            'Dystopian': 'subject:dystopian',
+            'Poetry': 'subject:poetry',
+          };
+          query = genreMap[genreFilter] || `subject:${genreFilter.toLowerCase()}`;
+        }
 
         const res = await fetch(
           `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=newest&maxResults=10`
@@ -58,10 +69,10 @@ export default function HomePage() {
           id: `weekly-${index}`,
           title: item.volumeInfo?.title || 'Unknown Title',
           author: item.volumeInfo?.authors?.[0] || 'Unknown Author',
-          coverUrl: item.volumeInfo?.imageLinks?.thumbnail || '',
+          coverUrl: item.volumeInfo?.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
           reason: 'Trending this week',
           platform: 'weekly',
-          genre: item.volumeInfo?.categories?.[0] || 'Fiction',
+          genre: genreFilter !== 'All' ? genreFilter : (item.volumeInfo?.categories?.[0] || 'Fiction'),
           goodreadsRating: undefined,
           review: item.volumeInfo?.description || 'Popular this week based on current discovery results.',
         }));
@@ -76,9 +87,12 @@ export default function HomePage() {
     }
 
     fetchWeeklyTopBooks();
-  }, []);
+  }, [genreFilter]);
+
   const filterByGenre = (books: TrendingBook[]) =>
     genreFilter === 'All' ? books : books.filter(b => b.genre === genreFilter);
+
+  const moodBooks = selectedMood ? (moodRecommendations[selectedMood] || []) : [];
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-12">
@@ -106,44 +120,50 @@ export default function HomePage() {
 
       {/* Top 5 Picks */}
       <section>
-        <div className="flex items-center gap-2 mb-5">
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
           <Sparkles className="h-5 w-5 text-primary" />
           <h2 className="section-title">Top Picks of the Week</h2>
           <span className="soft-badge bg-accent/40 text-accent-foreground ml-2">Readers 15–35</span>
         </div>
-        <p className="text-sm text-muted-foreground mb-6">Selected by creators and readers around the world</p>
+        <div className="flex items-center gap-3 mb-6">
+          <p className="text-sm text-muted-foreground">Selected by creators and readers around the world</p>
+          <Select value={genreFilter} onValueChange={setGenreFilter}>
+            <SelectTrigger className="w-48 bg-card border-border/50 rounded-xl ml-auto">
+              <SelectValue placeholder="Filter by genre" />
+            </SelectTrigger>
+            <SelectContent>
+              {genres.filter(g => g !== 'Custom').map(g => (
+                <SelectItem key={g} value={g}>{g}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         {isLoadingTopBooks ? (
-  <p className="text-sm text-muted-foreground">Loading this week’s books...</p>
-) : (
-  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-    {weeklyTopBooks.map((book, i) => (
-      <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
-        <TrendingBookCard
-          book={book}
-          onClick={(resolvedCoverUrl) =>
-            setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
-          }
-        />
-      </motion.div>
-    ))}
-  </div>
-)}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="glass-card aspect-[2/3] animate-pulse bg-muted/50 rounded-2xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {weeklyTopBooks.map((book, i) => (
+              <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
+                <TrendingBookCard
+                  book={book}
+                  onClick={(resolvedCoverUrl) =>
+                    setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
+                  }
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Genre Filter for Trending */}
       <div className="flex items-center gap-3">
         <TrendingUp className="h-5 w-5 text-primary" />
         <h2 className="section-title">Trending by Platform</h2>
-        <Select value={genreFilter} onValueChange={setGenreFilter}>
-          <SelectTrigger className="w-44 bg-card border-border/50 rounded-xl ml-auto">
-            <SelectValue placeholder="Filter by genre" />
-          </SelectTrigger>
-          <SelectContent>
-            {genres.filter(g => g !== 'Custom').map(g => (
-              <SelectItem key={g} value={g}>{g}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Trending by Platform */}
@@ -162,20 +182,85 @@ export default function HomePage() {
               {filtered.map((book, i) => (
                 <motion.div key={book.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
                   <TrendingBookCard
-  book={book}
-  onClick={(resolvedCoverUrl) =>
-    setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
-  }
-/>
+                    book={book}
+                    onClick={(resolvedCoverUrl) =>
+                      setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
+                    }
+                  />
                 </motion.div>
               ))}
             </div>
           </section>
         );
       })}
-          {selectedBook && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl relative">
+
+      {/* Mood / Vibe Picker */}
+      <section>
+        <div className="flex items-center gap-2 mb-2">
+          <Wand2 className="h-5 w-5 text-primary" />
+          <h2 className="section-title">What mood are you in today?</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-5">Pick a vibe and we'll suggest the perfect read</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          {moodVibes.map(vibe => (
+            <button
+              key={vibe.id}
+              onClick={() => setSelectedMood(selectedMood === vibe.id ? null : vibe.id)}
+              className={`glass-card p-4 text-left transition-all clickable-card ${
+                selectedMood === vibe.id ? 'ring-2 ring-primary bg-primary/10' : 'hover:bg-secondary/40'
+              }`}
+            >
+              <p className="font-display text-sm font-semibold text-foreground">{vibe.label}</p>
+              <p className="text-xs text-muted-foreground mt-1">{vibe.description}</p>
+            </button>
+          ))}
+        </div>
+        {selectedMood && moodBooks.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {moodBooks.map((book, i) => (
+              <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
+                <TrendingBookCard
+                  book={book}
+                  onClick={(resolvedCoverUrl) =>
+                    setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
+                  }
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </section>
+
+      {/* Weekly Recommendations */}
+      <section>
+        <div className="flex items-center gap-2 mb-2">
+          <Heart className="h-5 w-5 text-primary" />
+          <h2 className="section-title">Recommendations of the Week</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-6">Hand-picked books our community is loving right now</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {weeklyRecommendations.map((book, i) => (
+            <motion.div key={book.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
+              <TrendingBookCard
+                book={book}
+                onClick={(resolvedCoverUrl) =>
+                  setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
+                }
+              />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Book Detail Modal */}
+      {selectedBook && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setSelectedBook(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl relative"
+            onClick={e => e.stopPropagation()}
+          >
             <button
               onClick={() => setSelectedBook(null)}
               className="absolute top-3 right-3 rounded-full px-2 py-1 text-sm text-muted-foreground hover:bg-muted"
@@ -183,20 +268,24 @@ export default function HomePage() {
               ✕
             </button>
 
-           <div className="mx-auto mb-4 h-64 w-40 overflow-hidden rounded-xl">
-  <BookCover
-    title={selectedBook.title}
-    author={selectedBook.author}
-    coverUrl={selectedBook.coverUrl}
-  />
-</div>
+            <div className="mx-auto mb-4 h-64 w-40 overflow-hidden rounded-xl">
+              <BookCover
+                title={selectedBook.title}
+                author={selectedBook.author}
+                coverUrl={selectedBook.coverUrl}
+              />
+            </div>
 
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-xl font-display font-semibold text-foreground">
               {selectedBook.title}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               {selectedBook.author}
             </p>
+
+            {selectedBook.genre && (
+              <span className="soft-badge bg-secondary text-secondary-foreground mt-2">{selectedBook.genre}</span>
+            )}
 
             <p className="text-sm font-medium mt-3 text-foreground">
               Goodreads: {selectedBook.goodreadsRating ?? 'N/A'}
@@ -205,7 +294,7 @@ export default function HomePage() {
             <p className="text-sm text-muted-foreground mt-4 leading-6">
               {selectedBook.review || selectedBook.reason}
             </p>
-         </div>
+          </motion.div>
         </div>
       )}
     </div>
