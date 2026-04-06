@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { creatorPicks } from '@/data/seedData';
+import { creatorPicks, exploreArticles } from '@/data/seedData';
 import { motion } from 'framer-motion';
 import { Compass, ExternalLink, Sparkles, User } from 'lucide-react';
 
