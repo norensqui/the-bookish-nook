@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { BookOpen, Sparkles, TrendingUp, Heart, Wand2, Loader2 } from 'lucide-react';
+import { BookOpen, Sparkles, TrendingUp, Heart, Wand2, Loader2, Star } from 'lucide-react';
 import { trendingBooks, genres, TrendingBook, moodVibes, moodRecommendations, weeklyRecommendations, moodSearchQueries } from '@/data/seedData';
 import { TrendingBookCard, BookCover } from '@/components/BookCard';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -389,5 +389,3 @@ export default function HomePage() {
   );
 }
 
-// Re-export Star for use in other components
-import { Star } from 'lucide-react';
