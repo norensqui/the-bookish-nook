@@ -3,12 +3,12 @@ import { movieAdaptations, genres, MovieAdaptation } from '@/data/seedData';
 import { useBooks } from '@/context/BookContext';
 import { BookCover } from '@/components/BookCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Film, Star, Sparkles, X, User, Clapperboard } from 'lucide-react';
+import { Film, Star, Sparkles, User, Clapperboard, ExternalLink } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-const moods = ['All', 'melancholic', 'heartwarming', 'nostalgic', 'glamorous', 'emotional', 'empowering', 'romantic', 'epic', 'dark'];
-const years = ['All', '2025', '2024', '2023', '2021', '2020', '2019', '2017', '2014', '2013', '2012', '2010', '2007', '2005', '1980'];
+const moods = ['All', 'melancholic', 'heartwarming', 'nostalgic', 'glamorous', 'emotional', 'empowering', 'romantic', 'epic', 'dark', 'thrilling', 'inspiring'];
+const years = ['All', '2025', '2024', '2023', '2021', '2020', '2019', '2017', '2014', '2013', '2012', '2010', '2007', '2005', '2001', '1999', '1994', '1980', '1962'];
 
 export default function MoviesPage() {
   const { books } = useBooks();
@@ -86,7 +86,7 @@ export default function MoviesPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
-            className="glass-card overflow-hidden group book-card-hover cursor-pointer clickable-card"
+            className="glass-card overflow-hidden group book-card-hover cursor-pointer clickable-card hover:shadow-lg transition-shadow duration-300"
             onClick={() => setSelectedMovie(movie)}
           >
             {movie.recommended && (
@@ -97,13 +97,21 @@ export default function MoviesPage() {
             )}
             <div className="flex gap-2 p-3">
               <div className="w-20 shrink-0">
-                <div className="aspect-[2/3] overflow-hidden rounded-lg">
+                <div className="aspect-[2/3] overflow-hidden rounded-lg relative">
                   <BookCover title={movie.bookTitle} author={movie.author} coverUrl={movie.bookCoverUrl} />
                 </div>
                 <p className="text-[10px] text-muted-foreground text-center mt-1">Book</p>
               </div>
               <div className="w-20 shrink-0">
-                <img src={movie.moviePosterUrl} alt={movie.movieTitle} className="w-full aspect-[2/3] object-cover rounded-lg" />
+                <img
+                  src={movie.moviePosterUrl}
+                  alt={movie.movieTitle}
+                  loading="lazy"
+                  className="w-full aspect-[2/3] object-cover rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop';
+                  }}
+                />
                 <p className="text-[10px] text-muted-foreground text-center mt-1">Movie</p>
               </div>
             </div>
@@ -144,13 +152,21 @@ export default function MoviesPage() {
             <div className="space-y-4 mt-2">
               <div className="flex gap-4">
                 <div className="w-24 shrink-0">
-                  <div className="aspect-[2/3] overflow-hidden rounded-lg">
+                  <div className="aspect-[2/3] overflow-hidden rounded-lg relative">
                     <BookCover title={selectedMovie.bookTitle} author={selectedMovie.author} coverUrl={selectedMovie.bookCoverUrl} />
                   </div>
                   <p className="text-[10px] text-muted-foreground text-center mt-1">Book</p>
                 </div>
                 <div className="w-24 shrink-0">
-                  <img src={selectedMovie.moviePosterUrl} alt={selectedMovie.movieTitle} className="w-full aspect-[2/3] object-cover rounded-lg" />
+                  <img
+                    src={selectedMovie.moviePosterUrl}
+                    alt={selectedMovie.movieTitle}
+                    loading="lazy"
+                    className="w-full aspect-[2/3] object-cover rounded-lg"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop';
+                    }}
+                  />
                   <p className="text-[10px] text-muted-foreground text-center mt-1">Movie</p>
                 </div>
                 <div className="flex-1 min-w-0">

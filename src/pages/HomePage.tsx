@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { BookOpen, Sparkles, TrendingUp, Heart, Wand2 } from 'lucide-react';
-import { trendingBooks, genres, TrendingBook, moodVibes, moodRecommendations, weeklyRecommendations } from '@/data/seedData';
+import { useEffect, useState, useCallback } from 'react';
+import { BookOpen, Sparkles, TrendingUp, Heart, Wand2, Loader2 } from 'lucide-react';
+import { trendingBooks, genres, TrendingBook, moodVibes, moodRecommendations, weeklyRecommendations, moodSearchQueries } from '@/data/seedData';
 import { TrendingBookCard, BookCover } from '@/components/BookCard';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const platformIcons: Record<string, { label: string; color: string }> = {
   tiktok: { label: 'TikTok', color: 'bg-rose' },
@@ -26,14 +27,27 @@ export default function HomePage() {
   const [isLoadingTopBooks, setIsLoadingTopBooks] = useState(true);
   const [selectedBook, setSelectedBook] = useState<TrendingBook | null>(null);
   const [genreFilter, setGenreFilter] = useState('All');
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [selectedMood, setSelectedMood] = useState<string | null>(() => {
+    return localStorage.getItem('bookish_last_mood') || null;
+  });
+  const [moodBooks, setMoodBooks] = useState<TrendingBook[]>([]);
+  const [isLoadingMood, setIsLoadingMood] = useState(false);
 
+  // Persist genre filter
+  useEffect(() => {
+    const saved = localStorage.getItem('bookish_last_genre');
+    if (saved && genres.includes(saved)) setGenreFilter(saved);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('bookish_last_genre', genreFilter);
+  }, [genreFilter]);
+
+  // Fetch weekly top books
   useEffect(() => {
     async function fetchWeeklyTopBooks() {
       try {
         setIsLoadingTopBooks(true);
-
-        // Build query based on selected genre
         let query = 'subject:fiction';
         if (genreFilter !== 'All') {
           const genreMap: Record<string, string> = {
@@ -62,9 +76,7 @@ export default function HomePage() {
         const res = await fetch(
           `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=newest&maxResults=10`
         );
-
         const data = await res.json();
-
         const books: TrendingBook[] = (data.items || []).slice(0, 5).map((item: any, index: number) => ({
           id: `weekly-${index}`,
           title: item.volumeInfo?.title || 'Unknown Title',
@@ -76,7 +88,6 @@ export default function HomePage() {
           goodreadsRating: undefined,
           review: item.volumeInfo?.description || 'Popular this week based on current discovery results.',
         }));
-
         setWeeklyTopBooks(books);
       } catch (error) {
         console.error('Failed to fetch weekly top books:', error);
@@ -85,14 +96,53 @@ export default function HomePage() {
         setIsLoadingTopBooks(false);
       }
     }
-
     fetchWeeklyTopBooks();
   }, [genreFilter]);
 
+  // Fetch mood-based books dynamically
+  const fetchMoodBooks = useCallback(async (mood: string) => {
+    setIsLoadingMood(true);
+    try {
+      const query = moodSearchQueries[mood] || 'subject:fiction';
+      const res = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=relevance&maxResults=20`
+      );
+      const data = await res.json();
+      const apiBooks: TrendingBook[] = (data.items || []).slice(0, 10).map((item: any, index: number) => ({
+        id: `mood-api-${index}`,
+        title: item.volumeInfo?.title || 'Unknown Title',
+        author: item.volumeInfo?.authors?.[0] || 'Unknown Author',
+        coverUrl: item.volumeInfo?.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
+        reason: item.volumeInfo?.description?.slice(0, 80) || 'Recommended for your mood',
+        platform: 'mood',
+        genre: item.volumeInfo?.categories?.[0] || 'Fiction',
+        goodreadsRating: item.volumeInfo?.averageRating,
+        review: item.volumeInfo?.description || '',
+      }));
+
+      // Merge with curated fallback
+      const fallback = moodRecommendations[mood] || [];
+      const combined = apiBooks.length >= 5 ? apiBooks : [...apiBooks, ...fallback].slice(0, 10);
+      setMoodBooks(combined);
+    } catch {
+      // Fallback to seed data
+      setMoodBooks(moodRecommendations[mood] || []);
+    } finally {
+      setIsLoadingMood(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedMood) {
+      localStorage.setItem('bookish_last_mood', selectedMood);
+      fetchMoodBooks(selectedMood);
+    } else {
+      setMoodBooks([]);
+    }
+  }, [selectedMood, fetchMoodBooks]);
+
   const filterByGenre = (books: TrendingBook[]) =>
     genreFilter === 'All' ? books : books.filter(b => b.genre === genreFilter);
-
-  const moodBooks = selectedMood ? (moodRecommendations[selectedMood] || []) : [];
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-12">
@@ -141,7 +191,11 @@ export default function HomePage() {
         {isLoadingTopBooks ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="glass-card aspect-[2/3] animate-pulse bg-muted/50 rounded-2xl" />
+              <div key={i} className="space-y-2">
+                <Skeleton className="aspect-[2/3] rounded-2xl" />
+                <Skeleton className="h-4 w-3/4 rounded" />
+                <Skeleton className="h-3 w-1/2 rounded" />
+              </div>
             ))}
           </div>
         ) : (
@@ -160,13 +214,12 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Genre Filter for Trending */}
+      {/* Trending by Platform */}
       <div className="flex items-center gap-3">
         <TrendingUp className="h-5 w-5 text-primary" />
         <h2 className="section-title">Trending by Platform</h2>
       </div>
 
-      {/* Trending by Platform */}
       {Object.entries(trendingBooks).map(([platform, books]) => {
         const filtered = filterByGenre(books);
         if (filtered.length === 0) return null;
@@ -215,20 +268,42 @@ export default function HomePage() {
             </button>
           ))}
         </div>
-        {selectedMood && moodBooks.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {moodBooks.map((book, i) => (
-              <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
-                <TrendingBookCard
-                  book={book}
-                  onClick={(resolvedCoverUrl) =>
-                    setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
-                  }
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+        <AnimatePresence mode="wait">
+          {selectedMood && (
+            <motion.div
+              key={selectedMood}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
+            >
+              {isLoadingMood ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="aspect-[2/3] rounded-2xl" />
+                      <Skeleton className="h-4 w-3/4 rounded" />
+                      <Skeleton className="h-3 w-1/2 rounded" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {moodBooks.map((book, i) => (
+                    <motion.div key={book.id} custom={i} initial="hidden" animate="visible" variants={fadeUp}>
+                      <TrendingBookCard
+                        book={book}
+                        onClick={(resolvedCoverUrl) =>
+                          setSelectedBook({ ...book, coverUrl: resolvedCoverUrl })
+                        }
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* Weekly Recommendations */}
@@ -253,50 +328,66 @@ export default function HomePage() {
       </section>
 
       {/* Book Detail Modal */}
-      {selectedBook && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setSelectedBook(null)}>
+      <AnimatePresence>
+        {selectedBook && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl relative"
-            onClick={e => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={() => setSelectedBook(null)}
           >
-            <button
-              onClick={() => setSelectedBook(null)}
-              className="absolute top-3 right-3 rounded-full px-2 py-1 text-sm text-muted-foreground hover:bg-muted"
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl relative"
+              onClick={e => e.stopPropagation()}
             >
-              ✕
-            </button>
+              <button
+                onClick={() => setSelectedBook(null)}
+                className="absolute top-3 right-3 rounded-full px-2 py-1 text-sm text-muted-foreground hover:bg-muted clickable-card"
+              >
+                ✕
+              </button>
 
-            <div className="mx-auto mb-4 h-64 w-40 overflow-hidden rounded-xl">
-              <BookCover
-                title={selectedBook.title}
-                author={selectedBook.author}
-                coverUrl={selectedBook.coverUrl}
-              />
-            </div>
+              <div className="mx-auto mb-4 h-64 w-40 overflow-hidden rounded-xl relative">
+                <BookCover
+                  title={selectedBook.title}
+                  author={selectedBook.author}
+                  coverUrl={selectedBook.coverUrl}
+                />
+              </div>
 
-            <h2 className="text-xl font-display font-semibold text-foreground">
-              {selectedBook.title}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {selectedBook.author}
-            </p>
+              <h2 className="text-xl font-display font-semibold text-foreground">
+                {selectedBook.title}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {selectedBook.author}
+              </p>
 
-            {selectedBook.genre && (
-              <span className="soft-badge bg-secondary text-secondary-foreground mt-2">{selectedBook.genre}</span>
-            )}
+              {selectedBook.genre && (
+                <span className="soft-badge bg-secondary text-secondary-foreground mt-2">{selectedBook.genre}</span>
+              )}
 
-            <p className="text-sm font-medium mt-3 text-foreground">
-              Goodreads: {selectedBook.goodreadsRating ?? 'N/A'}
-            </p>
+              {selectedBook.goodreadsRating && (
+                <div className="flex items-center gap-1 mt-3">
+                  <Star className="h-4 w-4 fill-primary/70 text-primary/70" />
+                  <span className="text-sm font-medium text-foreground">{selectedBook.goodreadsRating}</span>
+                  <span className="text-xs text-muted-foreground">on Goodreads</span>
+                </div>
+              )}
 
-            <p className="text-sm text-muted-foreground mt-4 leading-6">
-              {selectedBook.review || selectedBook.reason}
-            </p>
+              <p className="text-sm text-muted-foreground mt-4 leading-6 line-clamp-4">
+                {selectedBook.review || selectedBook.reason}
+              </p>
+            </motion.div>
           </motion.div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+// Re-export Star for use in other components
+import { Star } from 'lucide-react';
