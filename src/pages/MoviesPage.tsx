@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const moods = ['All', 'melancholic', 'heartwarming', 'nostalgic', 'glamorous', 'emotional', 'empowering', 'romantic', 'epic', 'dark', 'thrilling', 'inspiring'];
-const years = ['All', '2025', '2024', '2023', '2021', '2020', '2019', '2017', '2014', '2013', '2012', '2010', '2007', '2005', '2001', '1999', '1994', '1980', '1962'];
+const years = ['All', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2014', '2013', '2012', '2011', '2007', '2005', '2004', '2001', '1999', '1994', '1962'];
 
 export default function MoviesPage() {
   const { books } = useBooks();
