@@ -3,12 +3,37 @@ import { movieAdaptations, genres, MovieAdaptation } from '@/data/seedData';
 import { useBooks } from '@/context/BookContext';
 import { BookCover } from '@/components/BookCard';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Film, Star, Sparkles, User, Clapperboard, ExternalLink } from 'lucide-react';
+import { Film, Star, Sparkles, User, Clapperboard } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const moods = ['All', 'melancholic', 'heartwarming', 'nostalgic', 'glamorous', 'emotional', 'empowering', 'romantic', 'epic', 'dark', 'thrilling', 'inspiring'];
-const years = ['All', '2025', '2024', '2023', '2021', '2020', '2019', '2017', '2014', '2013', '2012', '2010', '2007', '2005', '2001', '1999', '1994', '1980', '1962'];
+const years = ['All', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2014', '2013', '2012', '2011', '2007', '2005', '2004', '2001', '1999', '1994', '1962'];
+
+function MoviePoster({ src, alt }: { src: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src || src.includes('unsplash.com')) {
+    return (
+      <div className="w-full aspect-[2/3] rounded-lg bg-muted/60 flex items-center justify-center border border-border/30">
+        <div className="text-center p-2">
+          <Film className="h-5 w-5 text-muted-foreground/40 mx-auto mb-1" />
+          <p className="text-[9px] text-muted-foreground font-medium">Poster unavailable</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className="w-full aspect-[2/3] object-cover rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
+      onError={() => setHasError(true)}
+    />
+  );
+}
 
 export default function MoviesPage() {
   const { books } = useBooks();
@@ -50,7 +75,7 @@ export default function MoviesPage() {
           <Film className="h-5 w-5 text-primary" />
           <h1 className="font-display text-3xl font-bold text-foreground">Movies Adapted From Books</h1>
         </div>
-        <p className="text-sm text-muted-foreground mb-6">Discover beloved books brought to screen</p>
+        <p className="text-sm text-muted-foreground mb-6">Discover beloved books brought to screen · {movieAdaptations.length} adaptations</p>
       </motion.div>
 
       {/* Filters */}
@@ -85,7 +110,7 @@ export default function MoviesPage() {
             key={movie.id}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
+            transition={{ delay: Math.min(i * 0.03, 0.5) }}
             className="glass-card overflow-hidden group book-card-hover cursor-pointer clickable-card hover:shadow-lg transition-shadow duration-300"
             onClick={() => setSelectedMovie(movie)}
           >
@@ -103,15 +128,7 @@ export default function MoviesPage() {
                 <p className="text-[10px] text-muted-foreground text-center mt-1">Book</p>
               </div>
               <div className="w-20 shrink-0">
-                <img
-                  src={movie.moviePosterUrl}
-                  alt={movie.movieTitle}
-                  loading="lazy"
-                  className="w-full aspect-[2/3] object-cover rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop';
-                  }}
-                />
+                <MoviePoster src={movie.moviePosterUrl} alt={movie.movieTitle} />
                 <p className="text-[10px] text-muted-foreground text-center mt-1">Movie</p>
               </div>
             </div>
@@ -119,7 +136,7 @@ export default function MoviesPage() {
               <h3 className="font-display text-sm font-semibold text-foreground line-clamp-1">{movie.bookTitle}</h3>
               <p className="text-xs text-muted-foreground mt-0.5">{movie.movieTitle}</p>
               <p className="text-xs text-muted-foreground">{movie.author} · {movie.releaseYear}</p>
-              {movie.movieRating && (
+              {movie.movieRating !== undefined && movie.movieRating > 0 && (
                 <div className="flex items-center gap-1 mt-1.5">
                   <Star className="h-3 w-3 fill-primary/70 text-primary/70" />
                   <span className="text-xs font-medium text-foreground">{movie.movieRating}/10</span>
@@ -158,15 +175,7 @@ export default function MoviesPage() {
                   <p className="text-[10px] text-muted-foreground text-center mt-1">Book</p>
                 </div>
                 <div className="w-24 shrink-0">
-                  <img
-                    src={selectedMovie.moviePosterUrl}
-                    alt={selectedMovie.movieTitle}
-                    loading="lazy"
-                    className="w-full aspect-[2/3] object-cover rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop';
-                    }}
-                  />
+                  <MoviePoster src={selectedMovie.moviePosterUrl} alt={selectedMovie.movieTitle} />
                   <p className="text-[10px] text-muted-foreground text-center mt-1">Movie</p>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -180,7 +189,7 @@ export default function MoviesPage() {
                 </div>
               </div>
 
-              {selectedMovie.movieRating && (
+              {selectedMovie.movieRating !== undefined && selectedMovie.movieRating > 0 && (
                 <div className="glass-card p-3 bg-secondary/30">
                   <div className="flex items-center gap-2">
                     <Star className="h-5 w-5 fill-primary/70 text-primary/70" />
