@@ -1,23 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Palette, Layout, User, Sparkles, Type, Eye, Monitor } from 'lucide-react';
+import { Settings, Palette, Layout, User, Sparkles, Type, Eye } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-
-const themeOptions = [
-  { id: 'warm-cream', label: 'Warm Cream', color: 'bg-[hsl(36,30%,94%)]' },
-  { id: 'soft-beige', label: 'Soft Beige', color: 'bg-sand' },
-  { id: 'dusty-rose', label: 'Dusty Rose', color: 'bg-rose' },
-  { id: 'sage-green', label: 'Sage Green', color: 'bg-sage' },
-  { id: 'muted-lavender', label: 'Muted Lavender', color: 'bg-lavender' },
-];
+import { useTheme, themes } from '@/context/ThemeContext';
 
 export default function SettingsPage() {
-  const [selectedTheme, setSelectedTheme] = useState('warm-cream');
+  const { currentTheme, setTheme } = useTheme();
   const [compactView, setCompactView] = useState(false);
   const [displayName, setDisplayName] = useState('Book Lover');
   const [username, setUsername] = useState('@booklover');
@@ -67,15 +59,18 @@ export default function SettingsPage() {
             <h2 className="font-display text-lg font-semibold">Theme</h2>
           </div>
           <div className="grid grid-cols-5 gap-3">
-            {themeOptions.map(theme => (
+            {themes.map(theme => (
               <button
                 key={theme.id}
-                onClick={() => setSelectedTheme(theme.id)}
+                onClick={() => setTheme(theme.id)}
                 className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all clickable-card ${
-                  selectedTheme === theme.id ? 'ring-2 ring-primary bg-secondary/40' : 'hover:bg-secondary/30'
+                  currentTheme === theme.id ? 'ring-2 ring-primary bg-secondary/40' : 'hover:bg-secondary/30'
                 }`}
               >
-                <div className={`w-8 h-8 rounded-full ${theme.color} border border-border/50`} />
+                <div
+                  className="w-8 h-8 rounded-full border border-border/50"
+                  style={{ backgroundColor: theme.previewColor }}
+                />
                 <span className="text-xs text-muted-foreground">{theme.label}</span>
               </button>
             ))}
@@ -131,14 +126,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <Label>Font Size: {fontSize[0]}px</Label>
-            <Slider
-              value={fontSize}
-              onValueChange={setFontSize}
-              min={12}
-              max={20}
-              step={1}
-              className="mt-2"
-            />
+            <Slider value={fontSize} onValueChange={setFontSize} min={12} max={20} step={1} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">Adjust the base font size for readability</p>
           </div>
         </section>
