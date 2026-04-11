@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BookProvider } from "@/context/BookContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { AppLayout } from "@/components/AppLayout";
 import HomePage from "./pages/HomePage";
 import LibraryPage from "./pages/LibraryPage";
@@ -17,22 +18,24 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <BookProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/library" element={<LibraryPage />} />
-              <Route path="/explore" element={<ExplorePage />} />
-              <Route path="/movies" element={<MoviesPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppLayout>
-        </BrowserRouter>
-      </BookProvider>
+      <ThemeProvider>
+        <BookProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppLayout>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/library" element={<LibraryPage />} />
+                <Route path="/explore" element={<ExplorePage />} />
+                <Route path="/movies" element={<MoviesPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AppLayout>
+          </BrowserRouter>
+        </BookProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
