@@ -5,6 +5,7 @@ import { TrendingBookCard, BookCover } from '@/components/BookCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSettings } from '@/context/SettingsContext';
 
 const platformIcons: Record<string, { label: string; color: string }> = {
   tiktok: { label: 'TikTok', color: 'bg-rose' },
@@ -22,7 +23,32 @@ const fadeUp = {
   }),
 };
 
+// Today's date as a stable key (YYYY-MM-DD) so live data refreshes once per day.
+const todayKey = () => new Date().toISOString().split('T')[0];
+
+// Read a same-day cached payload; returns null if missing or stale (different day).
+function readDailyCache<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { date: string; data: T };
+    if (parsed.date !== todayKey()) return null;
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeDailyCache<T>(key: string, data: T) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ date: todayKey(), data }));
+  } catch {
+    /* ignore storage errors */
+  }
+}
+
 export default function HomePage() {
+  const { settings } = useSettings();
   const [weeklyTopBooks, setWeeklyTopBooks] = useState<TrendingBook[]>([]);
   const [isLoadingTopBooks, setIsLoadingTopBooks] = useState(true);
   const [selectedBook, setSelectedBook] = useState<TrendingBook | null>(null);
@@ -48,6 +74,16 @@ export default function HomePage() {
     async function fetchWeeklyTopBooks() {
       try {
         setIsLoadingTopBooks(true);
+
+        // Serve same-day cached picks instantly; only hit the API once per day per genre.
+        const cacheKey = `bookish_weekly_${genreFilter}`;
+        const cached = readDailyCache<TrendingBook[]>(cacheKey);
+        if (cached && cached.length > 0) {
+          setWeeklyTopBooks(cached);
+          setIsLoadingTopBooks(false);
+          return;
+        }
+
         let query = 'subject:fiction';
         if (genreFilter !== 'All') {
           const genreMap: Record<string, string> = {
@@ -73,8 +109,13 @@ export default function HomePage() {
           query = genreMap[genreFilter] || `subject:${genreFilter.toLowerCase()}`;
         }
 
+        // Rotate the window of results by day so the picks visibly change each day.
+        const dayOfYear = Math.floor(
+          (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+        );
+        const startIndex = (dayOfYear * 5) % 40;
         const res = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=newest&maxResults=10`
+          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=newest&startIndex=${startIndex}&maxResults=10`
         );
         const data = await res.json();
         const books: TrendingBook[] = (data.items || []).slice(0, 5).map((item: any, index: number) => ({
@@ -89,6 +130,7 @@ export default function HomePage() {
           review: item.volumeInfo?.description || 'Popular this week based on current discovery results.',
         }));
         setWeeklyTopBooks(books);
+        if (books.length > 0) writeDailyCache(`bookish_weekly_${genreFilter}`, books);
       } catch (error) {
         console.error('Failed to fetch weekly top books:', error);
         setWeeklyTopBooks([]);
@@ -157,7 +199,7 @@ export default function HomePage() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <BookOpen className="h-5 w-5 text-primary" />
-            <span className="text-xs font-body font-medium text-muted-foreground uppercase tracking-widest">Welcome back</span>
+            <span className="text-xs font-body font-medium text-muted-foreground uppercase tracking-widest">Welcome back, {settings.displayName}</span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-tight">
             Your cozy corner<br />for book discovery
@@ -176,7 +218,7 @@ export default function HomePage() {
           <span className="soft-badge bg-accent/40 text-accent-foreground ml-2">Readers 15–35</span>
         </div>
         <div className="flex items-center gap-3 mb-6">
-          <p className="text-sm text-muted-foreground">Selected by creators and readers around the world</p>
+          <p className="text-sm text-muted-foreground">Selected by creators and readers around the world · refreshes daily</p>
           <Select value={genreFilter} onValueChange={setGenreFilter}>
             <SelectTrigger className="w-48 bg-card border-border/50 rounded-xl ml-auto">
               <SelectValue placeholder="Filter by genre" />

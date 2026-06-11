@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useBooks } from '@/context/BookContext';
+import { useSettings } from '@/context/SettingsContext';
 import { BookCard } from '@/components/BookCard';
 import { Book, getMoodQuote, genres } from '@/data/seedData';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen, BookCheck, Heart, Search, Plus, Trash2, Edit, ArrowRight,
-  BarChart3, Flame, Calendar, Clock, FileText, Star, X, Quote
+  BarChart3, Flame, Calendar, Clock, FileText, Star, X, Quote, Loader2, Check
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,8 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 
 export default function LibraryPage() {
   const { books, readingLogs, addBook, updateBook, deleteBook, moveBook, toggleFavorite, addReadingLog } = useBooks();
-  const [activeTab, setActiveTab] = useState<'read' | 'reading' | 'wishlist' | 'tracker'>('reading');
+  const { settings } = useSettings();
+  const [activeTab, setActiveTab] = useState<'read' | 'reading' | 'wishlist' | 'tracker'>(settings.defaultView);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('title');
   const [ratingFilter, setRatingFilter] = useState('all');
@@ -52,6 +54,60 @@ export default function LibraryPage() {
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const [newLog, setNewLog] = useState({ bookId: '', date: new Date().toISOString().split('T')[0], pagesRead: 0, hoursRead: 0, notes: '' });
 
+  // Google Books search (inside the Add Book dialog)
+  const [bookSearch, setBookSearch] = useState('');
+  const [searchResults, setSearchResults] = useState<Array<Omit<Book, 'id'>>>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handleBookSearch = async () => {
+    const q = bookSearch.trim();
+    if (!q) return;
+    setIsSearching(true);
+    setHasSearched(true);
+    try {
+      const res = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=12`
+      );
+      const data = await res.json();
+      const results: Array<Omit<Book, 'id'>> = (data.items || []).map((item: any) => {
+        const v = item.volumeInfo || {};
+        return {
+          title: v.title || 'Unknown Title',
+          author: v.authors?.[0] || 'Unknown Author',
+          authorBio: '',
+          description: v.description || '',
+          coverUrl: (v.imageLinks?.thumbnail || v.imageLinks?.smallThumbnail || '').replace('http://', 'https://')
+            || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=450&fit=crop',
+          rating: 0,
+          notes: '',
+          startDate: '',
+          finishDate: '',
+          status: 'wishlist' as Book['status'],
+          totalPages: v.pageCount || 0,
+          currentPage: 0,
+          isFavorite: false,
+          genre: v.categories?.[0] || '',
+          mood: '',
+        };
+      });
+      setSearchResults(results);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const addFromSearch = (result: Omit<Book, 'id'>) => {
+    addBook({ ...result, status: activeTab === 'tracker' ? 'reading' : activeTab });
+    // Reset search state and close the dialog
+    setBookSearch('');
+    setSearchResults([]);
+    setHasSearched(false);
+    setAddDialogOpen(false);
+  };
+
   const filteredBooks = books
     .filter(b => activeTab === 'tracker' ? b.status === 'reading' : b.status === activeTab)
     .filter(b => b.title.toLowerCase().includes(search.toLowerCase()) || b.author.toLowerCase().includes(search.toLowerCase()))
@@ -59,6 +115,14 @@ export default function LibraryPage() {
     .sort((a, b) => sortBy === 'title' ? a.title.localeCompare(b.title) : sortBy === 'author' ? a.author.localeCompare(b.author) : b.rating - a.rating);
 
   const readingBooks = books.filter(b => b.status === 'reading');
+
+  // Grid columns driven by the Settings page.
+  const gridColsClass = settings.gridColumns === 'auto'
+    ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
+    : settings.gridColumns === '3' ? 'grid-cols-2 sm:grid-cols-3'
+    : settings.gridColumns === '4' ? 'grid-cols-2 sm:grid-cols-4'
+    : settings.gridColumns === '5' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5'
+    : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-6';
 
   const handleAddBook = () => {
     addBook({ ...newBook, status: activeTab === 'tracker' ? 'reading' : activeTab });
@@ -99,10 +163,30 @@ export default function LibraryPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <h1 className="font-display text-3xl font-bold text-foreground">My Library</h1>
         <p className="text-sm text-muted-foreground mt-1">Your personal reading collection</p>
       </motion.div>
+
+      {/* Stats summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+        {[
+          { label: 'Read', value: books.filter(b => b.status === 'read').length, icon: BookCheck },
+          { label: 'Reading', value: books.filter(b => b.status === 'reading').length, icon: BookOpen },
+          { label: 'Wishlist', value: books.filter(b => b.status === 'wishlist').length, icon: Heart },
+          { label: 'Favorites', value: books.filter(b => b.isFavorite).length, icon: Star },
+        ].map(stat => (
+          <div key={stat.label} className="glass-card p-4 flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-secondary/50">
+              <stat.icon className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <p className="font-display text-xl font-bold text-foreground leading-none">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
@@ -149,6 +233,64 @@ export default function LibraryPage() {
               </DialogTrigger>
               <DialogContent className="glass-card border-border/50 max-h-[85vh] overflow-y-auto">
                 <DialogHeader><DialogTitle className="font-display">Add New Book</DialogTitle></DialogHeader>
+
+                {/* Search Google Books */}
+                <div className="mt-4 space-y-3">
+                  <Label>Search for a book</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Title, author, or keyword..."
+                        value={bookSearch}
+                        onChange={e => setBookSearch(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleBookSearch(); } }}
+                        className="pl-9 bg-background/50 rounded-xl"
+                      />
+                    </div>
+                    <Button type="button" onClick={handleBookSearch} disabled={isSearching} className="rounded-xl bg-primary text-primary-foreground">
+                      {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+                    </Button>
+                  </div>
+
+                  {isSearching && (
+                    <div className="flex items-center justify-center py-6 text-muted-foreground">
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" /> Searching…
+                    </div>
+                  )}
+
+                  {!isSearching && hasSearched && searchResults.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No matches found. Try a different search, or add the details manually below.</p>
+                  )}
+
+                  {searchResults.length > 0 && (
+                    <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+                      {searchResults.map((r, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2 rounded-xl bg-background/40 hover:bg-secondary/40 transition-colors">
+                          <img src={r.coverUrl} alt={r.title} className="w-10 h-14 object-cover rounded-md shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground line-clamp-1">{r.title}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-1">{r.author}{r.totalPages ? ` · ${r.totalPages} pages` : ''}</p>
+                          </div>
+                          <div className="flex gap-1.5 shrink-0">
+                            <Button type="button" size="sm" variant="outline" className="rounded-lg h-8" onClick={() => { setNewBook({ ...r }); setSearchResults([]); setHasSearched(false); }}>
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button type="button" size="sm" className="rounded-lg h-8 bg-primary text-primary-foreground" onClick={() => addFromSearch(r)}>
+                              <Check className="h-3 w-3 mr-1" /> Add
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border/50" /></div>
+                  <div className="relative flex justify-center"><span className="bg-card px-2 text-xs text-muted-foreground">or add manually</span></div>
+                </div>
+
                 <div className="space-y-4 mt-4">
                   <div><Label>Title</Label><Input value={newBook.title} onChange={e => setNewBook({...newBook, title: e.target.value})} className="bg-background/50 rounded-xl" /></div>
                   <div><Label>Author</Label><Input value={newBook.author} onChange={e => setNewBook({...newBook, author: e.target.value})} className="bg-background/50 rounded-xl" /></div>
@@ -187,7 +329,7 @@ export default function LibraryPage() {
               <p className="text-sm text-muted-foreground mt-1">Add your first book to get started!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div className={`grid ${gridColsClass} gap-4`}>
               <AnimatePresence>
                 {filteredBooks.map((book, i) => (
                   <motion.div key={book.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.03 }}>
@@ -201,8 +343,8 @@ export default function LibraryPage() {
                         onFavoriteToggle={() => toggleFavorite(book.id)}
                         onClick={() => setEditingBook(book)}
                         progress={book.totalPages > 0 ? (book.currentPage / book.totalPages) * 100 : undefined}
-                        moodQuote={book.moodQuote}
-                        showRating={true}
+                        moodQuote={settings.showMoodQuotes ? book.moodQuote : undefined}
+                        showRating={settings.showRatings}
                       />
                       <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         <button onClick={() => deleteBook(book.id)} className="p-1.5 rounded-full bg-destructive/80 text-destructive-foreground backdrop-blur-sm">

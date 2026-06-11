@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, Palette, Layout, User, Sparkles, Type, Eye } from 'lucide-react';
 import { Label } from '@/components/ui/label';
@@ -7,20 +6,11 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { useTheme, themes } from '@/context/ThemeContext';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function SettingsPage() {
   const { currentTheme, setTheme } = useTheme();
-  const [compactView, setCompactView] = useState(false);
-  const [displayName, setDisplayName] = useState('Book Lover');
-  const [username, setUsername] = useState('@booklover');
-  const [fontSize, setFontSize] = useState([16]);
-  const [showCovers, setShowCovers] = useState(true);
-  const [showRatings, setShowRatings] = useState(true);
-  const [showMoodQuotes, setShowMoodQuotes] = useState(true);
-  const [animationsEnabled, setAnimationsEnabled] = useState(true);
-  const [gridColumns, setGridColumns] = useState('auto');
-  const [defaultView, setDefaultView] = useState('reading');
-  const [cardStyle, setCardStyle] = useState('rounded');
+  const { settings, updateSettings } = useSettings();
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
@@ -42,11 +32,11 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div>
               <Label>Display Name</Label>
-              <Input value={displayName} onChange={e => setDisplayName(e.target.value)} className="bg-background/50 rounded-xl mt-1" />
+              <Input value={settings.displayName} onChange={e => updateSettings({ displayName: e.target.value })} className="bg-background/50 rounded-xl mt-1" />
             </div>
             <div>
               <Label>Username</Label>
-              <Input value={username} onChange={e => setUsername(e.target.value)} className="bg-background/50 rounded-xl mt-1" placeholder="@yourusername" />
+              <Input value={settings.username} onChange={e => updateSettings({ username: e.target.value })} className="bg-background/50 rounded-xl mt-1" placeholder="@yourusername" />
               <p className="text-xs text-muted-foreground mt-1">This is your unique identifier</p>
             </div>
           </div>
@@ -89,11 +79,11 @@ export default function SettingsPage() {
                 <p className="text-sm font-medium text-foreground">Compact View</p>
                 <p className="text-xs text-muted-foreground">Show more books with smaller cards</p>
               </div>
-              <Switch checked={compactView} onCheckedChange={setCompactView} />
+              <Switch checked={settings.compactView} onCheckedChange={v => updateSettings({ compactView: v })} />
             </div>
             <div>
               <Label>Grid Columns</Label>
-              <Select value={gridColumns} onValueChange={setGridColumns}>
+              <Select value={settings.gridColumns} onValueChange={v => updateSettings({ gridColumns: v })}>
                 <SelectTrigger className="bg-background/50 rounded-xl mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="auto">Auto (Responsive)</SelectItem>
@@ -106,7 +96,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <Label>Card Style</Label>
-              <Select value={cardStyle} onValueChange={setCardStyle}>
+              <Select value={settings.cardStyle} onValueChange={v => updateSettings({ cardStyle: v })}>
                 <SelectTrigger className="bg-background/50 rounded-xl mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="rounded">Rounded (Default)</SelectItem>
@@ -125,8 +115,8 @@ export default function SettingsPage() {
             <h2 className="font-display text-lg font-semibold">Typography</h2>
           </div>
           <div>
-            <Label>Font Size: {fontSize[0]}px</Label>
-            <Slider value={fontSize} onValueChange={setFontSize} min={12} max={20} step={1} className="mt-2" />
+            <Label>Font Size: {settings.fontSize}px</Label>
+            <Slider value={[settings.fontSize]} onValueChange={v => updateSettings({ fontSize: v[0] })} min={12} max={20} step={1} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">Adjust the base font size for readability</p>
           </div>
         </section>
@@ -143,28 +133,28 @@ export default function SettingsPage() {
                 <p className="text-sm font-medium text-foreground">Book Covers</p>
                 <p className="text-xs text-muted-foreground">Show auto-fetched real book covers</p>
               </div>
-              <Switch checked={showCovers} onCheckedChange={setShowCovers} />
+              <Switch checked={settings.showCovers} onCheckedChange={v => updateSettings({ showCovers: v })} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground">Ratings Display</p>
                 <p className="text-xs text-muted-foreground">Show star ratings on book cards</p>
               </div>
-              <Switch checked={showRatings} onCheckedChange={setShowRatings} />
+              <Switch checked={settings.showRatings} onCheckedChange={v => updateSettings({ showRatings: v })} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground">Mood Quotes</p>
                 <p className="text-xs text-muted-foreground">Show auto-generated mood quotes on reviews</p>
               </div>
-              <Switch checked={showMoodQuotes} onCheckedChange={setShowMoodQuotes} />
+              <Switch checked={settings.showMoodQuotes} onCheckedChange={v => updateSettings({ showMoodQuotes: v })} />
             </div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground">Animations</p>
                 <p className="text-xs text-muted-foreground">Enable smooth transitions and micro-animations</p>
               </div>
-              <Switch checked={animationsEnabled} onCheckedChange={setAnimationsEnabled} />
+              <Switch checked={settings.animationsEnabled} onCheckedChange={v => updateSettings({ animationsEnabled: v })} />
             </div>
           </div>
         </section>
@@ -177,7 +167,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <Label>Default Library View</Label>
-            <Select value={defaultView} onValueChange={setDefaultView}>
+            <Select value={settings.defaultView} onValueChange={v => updateSettings({ defaultView: v as 'read' | 'reading' | 'wishlist' })}>
               <SelectTrigger className="bg-background/50 rounded-xl mt-1"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="read">Read</SelectItem>

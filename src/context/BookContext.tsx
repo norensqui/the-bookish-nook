@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Book, ReadingLog, sampleBooks, sampleReadingLogs } from '@/data/seedData';
 
 interface BookContextType {
@@ -14,9 +14,43 @@ interface BookContextType {
 
 const BookContext = createContext<BookContextType | undefined>(undefined);
 
+const BOOKS_KEY = 'bookish_books';
+const LOGS_KEY = 'bookish_reading_logs';
+
+function loadFromStorage<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const BookProvider = ({ children }: { children: ReactNode }) => {
-  const [books, setBooks] = useState<Book[]>(sampleBooks);
-  const [readingLogs, setReadingLogs] = useState<ReadingLog[]>(sampleReadingLogs);
+  // Seed the library on first run, then read from localStorage on every load.
+  const [books, setBooks] = useState<Book[]>(() => loadFromStorage(BOOKS_KEY, sampleBooks));
+  const [readingLogs, setReadingLogs] = useState<ReadingLog[]>(() =>
+    loadFromStorage(LOGS_KEY, sampleReadingLogs)
+  );
+
+  // Persist whenever data changes so nothing is lost on refresh.
+  useEffect(() => {
+    try {
+      localStorage.setItem(BOOKS_KEY, JSON.stringify(books));
+    } catch {
+      /* storage full or unavailable — ignore */
+    }
+  }, [books]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOGS_KEY, JSON.stringify(readingLogs));
+    } catch {
+      /* storage full or unavailable — ignore */
+    }
+  }, [readingLogs]);
 
   const addBook = (book: Omit<Book, 'id'>) => {
     setBooks(prev => [...prev, { ...book, id: Date.now().toString() }]);
