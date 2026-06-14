@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSettings } from '@/context/SettingsContext';
-import { BookStackArt, SprigDivider } from '@/components/Decorations';
+import { CozyNookArt, SprigDivider } from '@/components/Decorations';
 
 const platformIcons: Record<string, { label: string; color: string }> = {
   tiktok: { label: 'TikTok', color: 'bg-rose' },
@@ -215,7 +215,7 @@ export default function HomePage() {
             <p className="font-display text-xs text-foreground/75 leading-tight">chapter <span className="text-accent-foreground">♥</span></p>
           </div>
         </div>
-        <BookStackArt className="hidden md:block absolute bottom-0 right-8 w-32 h-32 opacity-95 pointer-events-none" />
+        <CozyNookArt className="hidden md:block absolute bottom-1 right-5 w-48 opacity-95 pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <BookOpen className="h-5 w-5 text-primary" />
