@@ -645,7 +645,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp1', creator: 'Jack Edwards', platform: 'YouTube',
     profileUrl: 'https://www.youtube.com/@JackEdwards',
-    creatorAvatar: 'https://yt3.googleusercontent.com/ytc/AIdro_nFzB7kLOMK7PR8pEOIf2vYLkIYd8wE3YD1RqG2f0TLHQ=s176-c-k-c0x00ffffff-no-rj',
+    creatorAvatar: 'https://unavatar.io/youtube/JackEdwards?fallback=false',
     books: [
       { title: 'Babel', author: 'R.F. Kuang', coverUrl: '', reason: 'If you love dark academia, this is the one.' },
       { title: 'Project Hail Mary', author: 'Andy Weir', coverUrl: '', reason: 'The most fun I\'ve had reading sci-fi in years.' },
@@ -657,7 +657,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp2', creator: 'Ariel Bissett', platform: 'YouTube',
     profileUrl: 'https://www.youtube.com/@ArielBissett',
-    creatorAvatar: 'https://yt3.googleusercontent.com/ytc/AIdro_nGRJI-aFPKz7yvSQVtK3g5bMHiPxqR3J9aaQZi8KpTqw=s176-c-k-c0x00ffffff-no-rj',
+    creatorAvatar: 'https://unavatar.io/youtube/ArielBissett?fallback=false',
     books: [
       { title: 'Norwegian Wood', author: 'Haruki Murakami', coverUrl: '', reason: 'Nostalgic and beautifully melancholic.' },
       { title: 'The Bell Jar', author: 'Sylvia Plath', coverUrl: '', reason: 'A raw, essential classic.' },
@@ -669,7 +669,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp3', creator: 'thisstoryaintover', platform: 'TikTok',
     profileUrl: 'https://www.tiktok.com/@thisstoryaintover',
-    creatorAvatar: 'https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/7229715028295680006~c5_100x100.jpeg',
+    creatorAvatar: 'https://unavatar.io/tiktok/thisstoryaintover?fallback=false',
     books: [
       { title: 'The Seven Husbands of Evelyn Hugo', author: 'Taylor Jenkins Reid', coverUrl: '', reason: 'Glamorous, heartbreaking, unforgettable.' },
       { title: 'A Little Life', author: 'Hanya Yanagihara', coverUrl: '', reason: 'The most emotionally intense book I\'ve ever read.' },
@@ -681,7 +681,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp4', creator: 'Haley Pham', platform: 'YouTube',
     profileUrl: 'https://www.youtube.com/@HaleyPham',
-    creatorAvatar: 'https://yt3.googleusercontent.com/ytc/AIdro_mhZ3P_aKJVq7f8_Y0P2f3V6jNJHIvE-J3tW8bCsJBWsA=s176-c-k-c0x00ffffff-no-rj',
+    creatorAvatar: 'https://unavatar.io/youtube/HaleyPham?fallback=false',
     books: [
       { title: 'Atomic Habits', author: 'James Clear', coverUrl: '', reason: 'Changed my entire morning routine.' },
       { title: 'The Alchemist', author: 'Paulo Coelho', coverUrl: '', reason: 'A timeless tale about following your dreams.' },
@@ -693,7 +693,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp5', creator: 'Moya Mawhinney', platform: 'YouTube',
     profileUrl: 'https://www.youtube.com/@MoyaMawhinney',
-    creatorAvatar: 'https://yt3.googleusercontent.com/ytc/AIdro_l3L7WTmGa6iJ6O4eG0Hp7E0cM7Jg5vLPEGmj2=s176-c-k-c0x00ffffff-no-rj',
+    creatorAvatar: 'https://unavatar.io/youtube/MoyaMawhinney?fallback=false',
     books: [
       { title: 'A Court of Thorns and Roses', author: 'Sarah J. Maas', coverUrl: '', reason: 'The series that started my fantasy obsession.' },
       { title: 'Fourth Wing', author: 'Rebecca Yarros', coverUrl: '', reason: 'Dragons, romance, action — everything I love.' },
@@ -705,7 +705,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp6', creator: 'withcindy', platform: 'Instagram',
     profileUrl: 'https://www.instagram.com/withcindy/',
-    creatorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=176&h=176&fit=crop&crop=face',
+    creatorAvatar: 'https://unavatar.io/instagram/withcindy?fallback=false',
     books: [
       { title: 'Normal People', author: 'Sally Rooney', coverUrl: '', reason: 'Quiet, devastating, and so real.' },
       { title: 'Conversations with Friends', author: 'Sally Rooney', coverUrl: '', reason: 'Messy, complicated, and very human.' },
@@ -717,7 +717,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp7', creator: 'emmareadsandcoffee', platform: 'TikTok',
     profileUrl: 'https://www.tiktok.com/@emmareadsandcoffee',
-    creatorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=176&h=176&fit=crop&crop=face',
+    creatorAvatar: 'https://unavatar.io/tiktok/emmareadsandcoffee?fallback=false',
     books: [
       { title: 'The Midnight Library', author: 'Matt Haig', coverUrl: '', reason: 'A gentle reminder that every life is worth living.' },
       { title: 'Intermezzo', author: 'Sally Rooney', coverUrl: '', reason: 'Rooney at her most intimate and mature.' },
@@ -729,7 +729,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp8', creator: 'booksandbao', platform: 'Blog',
     profileUrl: 'https://www.booksandbao.com/',
-    creatorAvatar: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=176&h=176&fit=crop&crop=face',
+    creatorAvatar: 'https://unavatar.io/booksandbao.com?fallback=false',
     books: [
       { title: 'Piranesi', author: 'Susanna Clarke', coverUrl: '', reason: 'Ethereal and hauntingly beautiful.' },
       { title: 'Circe', author: 'Madeline Miller', coverUrl: '', reason: 'A fierce, poetic reimagining of mythology.' },
@@ -741,7 +741,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp9', creator: 'Daniel Greene', platform: 'YouTube',
     profileUrl: 'https://www.youtube.com/@DanielGreeneReviews',
-    creatorAvatar: 'https://yt3.googleusercontent.com/ytc/AIdro_kJz_hP6Pu8CpEE1b5P0fPMq1z9x2UiKuJGRu4nOBcOQ=s176-c-k-c0x00ffffff-no-rj',
+    creatorAvatar: 'https://unavatar.io/youtube/DanielGreeneReviews?fallback=false',
     books: [
       { title: 'The Name of the Wind', author: 'Patrick Rothfuss', coverUrl: '', reason: 'The prose is absolutely magical.' },
       { title: 'Dune', author: 'Frank Herbert', coverUrl: '', reason: 'The foundation of modern sci-fi.' },
@@ -753,7 +753,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp10', creator: 'Merphy Napier', platform: 'YouTube',
     profileUrl: 'https://www.youtube.com/@MerphyNapier',
-    creatorAvatar: 'https://yt3.googleusercontent.com/ytc/AIdro_mvkKxIxWAZh8LQGbKI3CZdXX5EhbKl7mXpVNYpVKdQ=s176-c-k-c0x00ffffff-no-rj',
+    creatorAvatar: 'https://unavatar.io/youtube/MerphyNapier?fallback=false',
     books: [
       { title: 'Fourth Wing', author: 'Rebecca Yarros', coverUrl: '', reason: 'Dragons + romance = perfection.' },
       { title: 'A Court of Thorns and Roses', author: 'Sarah J. Maas', coverUrl: '', reason: 'The series that launched a genre.' },
@@ -765,7 +765,7 @@ export const creatorPicks: CreatorPick[] = [
   {
     id: 'cp11', creator: 'Cindy Pham', platform: 'TikTok',
     profileUrl: 'https://www.tiktok.com/@phamcindy',
-    creatorAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=176&h=176&fit=crop&crop=face',
+    creatorAvatar: 'https://unavatar.io/tiktok/phamcindy?fallback=false',
     books: [
       { title: 'Pachinko', author: 'Min Jin Lee', coverUrl: '', reason: 'A sweeping family epic that moved me to tears.' },
       { title: 'The Vanishing Half', author: 'Brit Bennett', coverUrl: '', reason: 'Identity, race, and belonging — beautifully told.' },

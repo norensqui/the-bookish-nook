@@ -13,6 +13,21 @@ const platformColors: Record<string, string> = {
   Blog: 'bg-sage/30 text-sage-foreground',
 };
 
+// Initials from a source name, e.g. "The New Yorker" -> "NY", "Literary Hub" -> "LH"
+function getInitials(name: string) {
+  const words = name.replace(/^The\s+/i, '').split(/\s+/).filter(Boolean);
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
+
+// Soft palette-consistent avatar tints, rotated per card.
+const avatarTints = [
+  'bg-accent/50 text-accent-foreground',
+  'bg-sage/50 text-sage-foreground',
+  'bg-secondary text-secondary-foreground',
+  'bg-rose/50 text-rose-foreground',
+];
+
 export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -73,13 +88,12 @@ export default function ExplorePage() {
               </a>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {cp.books.map((book, bi) => (
-                  <div key={bi} className="min-w-[110px] flex-shrink-0 group/book">
-                    <div className="w-full aspect-[2/3] overflow-hidden rounded-lg relative">
+                  <div key={bi} className="w-[84px] flex-shrink-0 group/book" title={`${book.title} — "${book.reason}"`}>
+                    <div className="w-[84px] aspect-[2/3] overflow-hidden rounded-xl relative shadow-sm transition-transform duration-200 group-hover/book:-translate-y-0.5">
                       <BookCover title={book.title} author={book.author} coverUrl={book.coverUrl} />
                     </div>
-                    <h4 className="font-display text-xs font-semibold text-foreground mt-2 line-clamp-1">{book.title}</h4>
-                    <p className="text-[10px] text-muted-foreground">{book.author}</p>
-                    <p className="text-[10px] text-muted-foreground italic mt-1 line-clamp-2">"{book.reason}"</p>
+                    <h4 className="font-display text-[11px] font-semibold text-foreground mt-1.5 line-clamp-1 leading-tight">{book.title}</h4>
+                    <p className="text-[10px] text-muted-foreground line-clamp-1">{book.author}</p>
                   </div>
                 ))}
               </div>
@@ -95,13 +109,13 @@ export default function ExplorePage() {
       </div>
 
       {/* Categories */}
-      <div className="flex gap-2 mb-8 flex-wrap">
+      <div className="flex gap-1.5 mb-6 flex-wrap">
         {categories.map(cat => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-sm font-body transition-all clickable-card ${
-              activeCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary/60 text-muted-foreground hover:bg-secondary'
+            className={`px-3 py-1 rounded-full text-xs font-body transition-all clickable-card ${
+              activeCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
             }`}
           >
             {cat}
@@ -109,37 +123,35 @@ export default function ExplorePage() {
         ))}
       </div>
 
-      {/* Articles Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Articles — Substack-style feed */}
+      <div className="max-w-3xl space-y-3">
         {filtered.map((article, i) => (
           <motion.a
             key={article.id}
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="glass-card overflow-hidden group book-card-hover block clickable-card hover:shadow-lg transition-shadow duration-300"
+            transition={{ delay: i * 0.04 }}
+            className="glass-card group book-card-hover flex items-start gap-4 p-5 clickable-card"
           >
-            <div className="aspect-[16/10] overflow-hidden relative">
-              <img
-                src={article.imageUrl}
-                alt={article.title}
-                loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=250&fit=crop';
-                }}
-              />
+            <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-display text-sm font-semibold ${avatarTints[i % avatarTints.length]}`}>
+              {getInitials(article.source)}
             </div>
-            <div className="p-4">
-              <span className="soft-badge bg-secondary text-secondary-foreground mb-2">{article.category}</span>
-              <h3 className="font-display text-base font-semibold text-foreground mt-2 line-clamp-2 group-hover:text-primary transition-colors">{article.title}</h3>
-              <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{article.excerpt}</p>
-              <div className="flex items-center justify-between mt-3">
-                <span className="text-xs text-muted-foreground font-medium">{article.source}</span>
-                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                <span className="font-medium text-foreground/80">{article.source}</span>
+                <span className="opacity-50">·</span>
+                <span>{article.category}</span>
+              </div>
+              <h3 className="font-display text-lg font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                {article.title}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{article.excerpt}</p>
+              <div className="flex items-center gap-1.5 mt-3 text-xs font-medium text-primary/80 group-hover:text-primary transition-colors">
+                Read on {article.source}
+                <ExternalLink className="h-3 w-3" />
               </div>
             </div>
           </motion.a>

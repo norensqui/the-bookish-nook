@@ -114,9 +114,13 @@ export default function HomePage() {
           (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
         );
         const startIndex = (dayOfYear * 5) % 40;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 7000);
         const res = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=newest&startIndex=${startIndex}&maxResults=10`
+          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=newest&startIndex=${startIndex}&maxResults=10`,
+          { signal: controller.signal }
         );
+        clearTimeout(timeout);
         const data = await res.json();
         const books: TrendingBook[] = (data.items || []).slice(0, 5).map((item: any, index: number) => ({
           id: `weekly-${index}`,
@@ -129,11 +133,17 @@ export default function HomePage() {
           goodreadsRating: undefined,
           review: item.volumeInfo?.description || 'Popular this week based on current discovery results.',
         }));
-        setWeeklyTopBooks(books);
-        if (books.length > 0) writeDailyCache(`bookish_weekly_${genreFilter}`, books);
+        if (books.length > 0) {
+          setWeeklyTopBooks(books);
+          writeDailyCache(`bookish_weekly_${genreFilter}`, books);
+        } else {
+          // API returned nothing — show curated picks instead of an empty grid.
+          setWeeklyTopBooks(filterByGenre(weeklyRecommendations));
+        }
       } catch (error) {
+        // Network error / blocked request / timeout — fall back to curated picks.
         console.error('Failed to fetch weekly top books:', error);
-        setWeeklyTopBooks([]);
+        setWeeklyTopBooks(filterByGenre(weeklyRecommendations));
       } finally {
         setIsLoadingTopBooks(false);
       }

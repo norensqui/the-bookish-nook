@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Star, Heart, Quote } from 'lucide-react';
+import { Star, Heart, Quote, BookOpen } from 'lucide-react';
 import { TrendingBook } from '@/data/seedData';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,6 +22,34 @@ interface BookCardProps {
   showRating?: boolean;
 }
 
+// A designed book-cover placeholder shown when no real cover image is available.
+// Looks intentional (stylized spine + title), not like a broken image.
+const fallbackTints = [
+  'from-accent/70 to-rose/40',
+  'from-sage/70 to-secondary',
+  'from-secondary to-muted',
+  'from-primary/40 to-sage/50',
+  'from-rose/50 to-accent/40',
+];
+
+function CoverFallback({ title, author }: { title: string; author: string }) {
+  const idx =
+    Array.from(title).reduce((sum, c) => sum + c.charCodeAt(0), 0) % fallbackTints.length;
+  return (
+    <div
+      className={`absolute inset-0 flex flex-col justify-between p-3 bg-gradient-to-br ${fallbackTints[idx]} rounded-lg border-l-4 border-foreground/10`}
+    >
+      <BookOpen className="h-4 w-4 text-foreground/35" />
+      <div>
+        <p className="font-display text-sm font-semibold text-foreground/85 leading-snug line-clamp-4">
+          {title}
+        </p>
+        <p className="text-[10px] text-foreground/55 mt-1 line-clamp-1">{author}</p>
+      </div>
+    </div>
+  );
+}
+
 export function BookCover({
   title,
   author,
@@ -33,18 +61,21 @@ export function BookCover({
   coverUrl: string;
   onResolved?: (url: string) => void;
 }) {
-  const [resolvedCover, setResolvedCover] = useState<string>(coverUrl);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const [resolvedCover, setResolvedCover] = useState<string>('');
+  // 'loading' while we resolve a cover, 'ready' once we have one, 'failed' if none.
+  const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>('loading');
+  const [imgLoaded, setImgLoaded] = useState(false);
   const onResolvedRef = useRef(onResolved);
   onResolvedRef.current = onResolved;
 
   useEffect(() => {
+    setImgLoaded(false);
     const isPlaceholder =
       coverUrl.includes('images.unsplash.com') || !coverUrl?.trim();
 
     if (!isPlaceholder) {
       setResolvedCover(coverUrl);
+      setStatus('ready');
       onResolvedRef.current?.(coverUrl);
       return;
     }
@@ -54,80 +85,85 @@ export function BookCover({
     const cached = coverCache.get(cacheKey);
     if (cached) {
       setResolvedCover(cached);
+      setStatus('ready');
       onResolvedRef.current?.(cached);
       return;
     }
 
     const controller = new AbortController();
+    // Don't let a slow/blocked request hang forever — give up after 7s.
+    const timeout = setTimeout(() => controller.abort(), 7000);
 
     async function fetchCover() {
       try {
+        // Use Open Library — a reliable, openly accessible cover source.
+        // A general query (title + author) matches more reliably than fielded search.
+        const q = `${title} ${author}`.trim();
         const res = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(
-            title
-          )}+inauthor:${encodeURIComponent(author)}`,
+          `https://openlibrary.org/search.json?q=${encodeURIComponent(
+            q
+          )}&limit=3&fields=cover_i,isbn`,
           { signal: controller.signal }
         );
 
         const data = await res.json();
-        const item = data?.items?.[0];
-        const image =
-          item?.volumeInfo?.imageLinks?.thumbnail ||
-          item?.volumeInfo?.imageLinks?.smallThumbnail;
+        const docs: any[] = data?.docs || [];
+        // Pick the first result that actually has a cover.
+        const withCover = docs.find(d => d?.cover_i) || docs.find(d => d?.isbn?.[0]);
+        const coverId = withCover?.cover_i;
+        const isbn = withCover?.isbn?.[0];
+
+        const image = coverId
+          ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`
+          : isbn
+          ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`
+          : '';
 
         if (image) {
-          const secureImage = image.replace('http://', 'https://');
-          coverCache.set(cacheKey, secureImage);
-          setResolvedCover(secureImage);
-          onResolvedRef.current?.(secureImage);
+          coverCache.set(cacheKey, image);
+          setResolvedCover(image);
+          setStatus('ready');
+          onResolvedRef.current?.(image);
         } else {
+          setStatus('failed');
           onResolvedRef.current?.(coverUrl);
         }
-      } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          console.error('Failed to fetch cover:', error);
-        }
+      } catch {
+        // Network error, blocked request, or timeout — show the text fallback.
+        setStatus('failed');
         onResolvedRef.current?.(coverUrl);
       }
     }
 
     fetchCover();
 
-    return () => controller.abort();
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, [title, author, coverUrl]);
 
-  if (!resolvedCover && !hasError) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-muted/60 rounded-lg">
-        <Skeleton className="w-full h-full rounded-lg" />
-      </div>
-    );
+  if (status === 'failed') {
+    return <CoverFallback title={title} author={author} />;
+  }
+
+  if (status === 'loading') {
+    return <Skeleton className="absolute inset-0 w-full h-full rounded-lg" />;
   }
 
   return (
     <>
-      {isLoading && (
+      {!imgLoaded && (
         <Skeleton className="absolute inset-0 w-full h-full rounded-lg z-10" />
       )}
       <img
         src={resolvedCover}
         alt={title}
         loading="lazy"
-        className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setIsLoading(false);
-          setHasError(true);
-        }}
+        className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={() => setImgLoaded(true)}
+        onError={() => setStatus('failed')}
       />
-      {hasError && !resolvedCover && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/60 rounded-lg">
-          <div className="text-center p-2">
-            <p className="text-xs font-display font-semibold text-muted-foreground line-clamp-2">{title}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">{author}</p>
-          </div>
-        </div>
-      )}
     </>
   );
 }

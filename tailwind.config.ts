@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["'Playfair Display'", "Georgia", "serif"],
-        body: ["'Inter'", "system-ui", "sans-serif"],
+        display: ["'Quicksand'", "system-ui", "sans-serif"],
+        body: ["'Nunito'", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

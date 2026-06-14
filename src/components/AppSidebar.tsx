@@ -26,13 +26,13 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/50">
+    <Sidebar collapsible="icon" className="border-r border-border/30 bg-sidebar/60 backdrop-blur-sm">
       <SidebarContent className="pt-6">
         <div className={`px-4 mb-8 flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
           <BookMarked className="h-6 w-6 text-primary" />
           {!collapsed && (
             <span className="font-display text-xl font-semibold text-foreground tracking-tight">
-              Bookish
+              Folio
             </span>
           )}
         </div>
@@ -46,8 +46,8 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === '/'}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:bg-secondary/60 transition-colors"
-                      activeClassName="bg-secondary text-foreground font-medium"
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-full text-muted-foreground hover:bg-secondary/60 transition-colors"
+                      activeClassName="bg-secondary text-foreground font-medium shadow-sm"
                     >
                       <item.icon className="h-5 w-5 shrink-0" />
                       {!collapsed && <span className="font-body text-sm">{item.title}</span>}
