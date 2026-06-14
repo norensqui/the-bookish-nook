@@ -88,100 +88,65 @@ export function EmptyShelfArt({ className = '' }: { className?: string }) {
   );
 }
 
-// ---- Hand-drawn bookish wallpaper (original, sketchy line-art behind every page) ----
+// ---- App-wide ambient layer: a light hand-drawn wallpaper + scattered cozy scenes ----
 export function PageBackdrop() {
   return (
-    <svg
-      className="pointer-events-none fixed inset-0 -z-10 h-full w-full"
-      aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <filter id="folio-ink" x="-5%" y="-5%" width="110%" height="110%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="7" result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-
-        <pattern id="folio-wallpaper" width="360" height="330" patternUnits="userSpaceOnUse" patternTransform="rotate(-2)">
-          <g
-            filter="url(#folio-ink)"
-            fill="none"
-            stroke="hsl(var(--foreground))"
-            strokeWidth="1.3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <g transform="translate(14,30)">
-              <path d="M1 9 Q21 3 23 8 Q25 3 45 9 L45 31 Q25 25 23 30 Q25 25 1 31 Z" />
-              <path d="M23 8 V30" />
-              <path d="M6 15 q4 -1.5 8 0" /><path d="M6 19 q4 -1.5 8 0" /><path d="M6 23 q3 -1.5 7 0" />
-              <path d="M30 15 q4 -1.5 8 0" /><path d="M30 19 q4 -1.5 8 0" /><path d="M30 23 q3 -1.5 7 0" />
+    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+      <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="folio-ink" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="7" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+          <pattern id="folio-wallpaper" width="360" height="330" patternUnits="userSpaceOnUse" patternTransform="rotate(-2)">
+            <g filter="url(#folio-ink)" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+              <g transform="translate(14,30)">
+                <path d="M1 9 Q21 3 23 8 Q25 3 45 9 L45 31 Q25 25 23 30 Q25 25 1 31 Z" />
+                <path d="M23 8 V30" />
+                <path d="M6 15 q4 -1.5 8 0" /><path d="M6 19 q4 -1.5 8 0" /><path d="M6 23 q3 -1.5 7 0" />
+                <path d="M30 15 q4 -1.5 8 0" /><path d="M30 19 q4 -1.5 8 0" /><path d="M30 23 q3 -1.5 7 0" />
+              </g>
+              <g transform="translate(214,20)">
+                <rect x="0" y="26" width="48" height="12" rx="2.5" fill="hsl(var(--rose))" fillOpacity="0.45" />
+                <rect x="5" y="14" width="42" height="12" rx="2.5" fill="hsl(var(--sage))" fillOpacity="0.45" />
+                <rect x="2" y="2" width="44" height="12" rx="2.5" fill="hsl(var(--card))" fillOpacity="0.8" />
+                <path d="M8 32 h10 M10 20 h9 M9 8 h11" strokeWidth="1" />
+              </g>
+              <g transform="translate(150,18)">
+                <path d="M16 50 Q14 32 16 18" />
+                <path d="M16 18 L6 4 M16 18 L11 2 M16 18 L16 0 M16 18 L21 2 M16 18 L26 4 M16 18 L2 9 M16 18 L30 9" strokeWidth="0.9" />
+                <circle cx="6" cy="4" r="1.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="16" cy="0" r="1.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="26" cy="4" r="1.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="2" cy="9" r="1.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="30" cy="9" r="1.4" fill="hsl(var(--rose))" stroke="none" />
+              </g>
+              <g transform="translate(300,40)">
+                <path d="M9 54 Q7 30 9 4" />
+                <path d="M9 14 q-11 -2 -13 -12 q9 1 13 8" fill="hsl(var(--sage))" fillOpacity="0.4" />
+                <path d="M9 26 q11 -2 13 -12 q-9 1 -13 8" fill="hsl(var(--sage))" fillOpacity="0.4" />
+                <path d="M9 38 q-11 -2 -13 -12 q9 1 13 8" fill="hsl(var(--sage))" fillOpacity="0.4" />
+              </g>
+              <g transform="translate(196,150)">
+                <path d="M16 54 L6 16 M16 54 L16 12 M16 54 L26 16 M16 54 L0 24 M16 54 L32 24" strokeWidth="1" />
+                <path d="M9 50 q7 5 14 0" strokeWidth="1.4" />
+                <circle cx="6" cy="15" r="2.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="16" cy="11" r="2.4" fill="hsl(var(--accent))" stroke="none" /><circle cx="26" cy="15" r="2.4" fill="hsl(var(--rose))" stroke="none" />
+              </g>
+              <g transform="translate(28,232)">
+                <rect x="0" y="22" width="40" height="11" rx="2.5" fill="hsl(var(--sage))" fillOpacity="0.45" />
+                <rect x="4" y="11" width="34" height="11" rx="2.5" fill="hsl(var(--rose))" fillOpacity="0.45" />
+                <rect x="1" y="0" width="36" height="11" rx="2.5" fill="hsl(var(--card))" fillOpacity="0.8" />
+              </g>
+              <circle cx="180" cy="120" r="1.3" fill="hsl(var(--accent))" stroke="none" />
+              <circle cx="330" cy="300" r="1.3" fill="hsl(var(--sage))" stroke="none" />
+              <circle cx="60" cy="320" r="1.3" fill="hsl(var(--rose))" stroke="none" />
             </g>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#folio-wallpaper)" opacity="0.28" />
+      </svg>
 
-            <g transform="translate(214,20)">
-              <rect x="0" y="26" width="48" height="12" rx="2.5" fill="hsl(var(--rose))" fillOpacity="0.45" />
-              <rect x="5" y="14" width="42" height="12" rx="2.5" fill="hsl(var(--sage))" fillOpacity="0.45" />
-              <rect x="2" y="2" width="44" height="12" rx="2.5" fill="hsl(var(--card))" fillOpacity="0.8" />
-              <path d="M8 32 h10 M10 20 h9 M9 8 h11" strokeWidth="1" />
-            </g>
-
-            <g transform="translate(150,18)">
-              <path d="M16 50 Q14 32 16 18" />
-              <path d="M16 18 L6 4 M16 18 L11 2 M16 18 L16 0 M16 18 L21 2 M16 18 L26 4 M16 18 L2 9 M16 18 L30 9" strokeWidth="0.9" />
-              <circle cx="6" cy="4" r="1.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="11" cy="2" r="1.4" fill="hsl(var(--rose))" stroke="none" />
-              <circle cx="16" cy="0" r="1.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="21" cy="2" r="1.4" fill="hsl(var(--rose))" stroke="none" />
-              <circle cx="26" cy="4" r="1.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="2" cy="9" r="1.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="30" cy="9" r="1.4" fill="hsl(var(--rose))" stroke="none" />
-            </g>
-
-            <g transform="translate(300,40)">
-              <path d="M9 54 Q7 30 9 4" />
-              <path d="M9 14 q-11 -2 -13 -12 q9 1 13 8" fill="hsl(var(--sage))" fillOpacity="0.4" />
-              <path d="M9 26 q11 -2 13 -12 q-9 1 -13 8" fill="hsl(var(--sage))" fillOpacity="0.4" />
-              <path d="M9 38 q-11 -2 -13 -12 q9 1 13 8" fill="hsl(var(--sage))" fillOpacity="0.4" />
-            </g>
-
-            <g transform="translate(96,150)" strokeWidth="0.9">
-              <path d="M14 46 Q12 26 14 8 M14 20 l-8 -6 M14 26 l9 -5 M14 32 l-9 -4" />
-              <circle cx="14" cy="8" r="1.5" fill="hsl(var(--rose))" stroke="none" /><circle cx="6" cy="14" r="1.5" fill="hsl(var(--rose))" stroke="none" />
-              <circle cx="23" cy="21" r="1.5" fill="hsl(var(--rose))" stroke="none" /><circle cx="5" cy="28" r="1.5" fill="hsl(var(--rose))" stroke="none" />
-            </g>
-
-            <g transform="translate(196,150)">
-              <path d="M16 54 L6 16 M16 54 L16 12 M16 54 L26 16 M16 54 L0 24 M16 54 L32 24" strokeWidth="1" />
-              <path d="M9 50 q7 5 14 0" strokeWidth="1.4" />
-              <circle cx="6" cy="15" r="2.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="16" cy="11" r="2.4" fill="hsl(var(--accent))" stroke="none" />
-              <circle cx="26" cy="15" r="2.4" fill="hsl(var(--rose))" stroke="none" /><circle cx="0" cy="23" r="2.2" fill="hsl(var(--sage))" stroke="none" /><circle cx="32" cy="23" r="2.2" fill="hsl(var(--sage))" stroke="none" />
-            </g>
-
-            <g transform="translate(286,210) scale(0.85)">
-              <path d="M1 9 Q21 3 23 8 Q25 3 45 9 L45 31 Q25 25 23 30 Q25 25 1 31 Z" />
-              <path d="M23 8 V30" />
-              <path d="M6 16 q4 -1.5 8 0 M6 21 q3 -1.5 7 0 M30 16 q4 -1.5 8 0 M30 21 q3 -1.5 7 0" strokeWidth="0.9" />
-            </g>
-
-            <g transform="translate(28,232)">
-              <rect x="0" y="22" width="40" height="11" rx="2.5" fill="hsl(var(--sage))" fillOpacity="0.45" />
-              <rect x="4" y="11" width="34" height="11" rx="2.5" fill="hsl(var(--rose))" fillOpacity="0.45" />
-              <rect x="1" y="0" width="36" height="11" rx="2.5" fill="hsl(var(--card))" fillOpacity="0.8" />
-            </g>
-
-            <g transform="translate(124,250)">
-              <circle cx="8" cy="2" r="2.6" fill="hsl(var(--rose))" fillOpacity="0.5" />
-              <circle cx="14" cy="8" r="2.6" fill="hsl(var(--rose))" fillOpacity="0.5" />
-              <circle cx="8" cy="14" r="2.6" fill="hsl(var(--rose))" fillOpacity="0.5" />
-              <circle cx="2" cy="8" r="2.6" fill="hsl(var(--rose))" fillOpacity="0.5" />
-              <circle cx="8" cy="8" r="2" fill="hsl(var(--accent))" stroke="none" />
-            </g>
-
-            <path d="M340 130 q-3 -7 0 -14 M340 130 q3 -7 0 -14" strokeWidth="0.9" />
-            <path d="M70 70 q-3 -6 0 -12 M70 70 q3 -6 0 -12" strokeWidth="0.9" />
-            <circle cx="180" cy="120" r="1.3" fill="hsl(var(--accent))" stroke="none" />
-            <circle cx="330" cy="300" r="1.3" fill="hsl(var(--sage))" stroke="none" />
-            <circle cx="60" cy="320" r="1.3" fill="hsl(var(--rose))" stroke="none" />
-          </g>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#folio-wallpaper)" opacity="0.5" />
-    </svg>
+      <CozyNookArt className="absolute top-[36%] right-[0.5%] w-36 sm:w-44 opacity-50" />
+      <CozyNookArt className="absolute bottom-[4%] left-[1%] w-36 sm:w-44 opacity-50 -scale-x-100" />
+      <BookStackArt className="absolute top-[6%] left-[1%] w-24 sm:w-28 opacity-50" />
+      <BookStackArt className="absolute bottom-[18%] right-[2%] w-24 sm:w-28 opacity-50" />
+      <EmptyShelfArt className="absolute top-[66%] left-[36%] w-28 sm:w-32 opacity-40" />
+    </div>
   );
 }
