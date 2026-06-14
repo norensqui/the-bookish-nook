@@ -206,6 +206,13 @@ export default function HomePage() {
         className="glass-card p-8 sm:p-12 relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-secondary/40 via-transparent to-accent/20 pointer-events-none" />
+        {/* Decorative "just one more chapter" note */}
+        <div className="hidden sm:block absolute top-6 right-8 z-10 rotate-3">
+          <div className="glass-card px-4 py-2 text-center shadow-sm">
+            <p className="font-display text-xs text-foreground/75 leading-tight">just one more</p>
+            <p className="font-display text-xs text-foreground/75 leading-tight">chapter <span className="text-accent-foreground">♥</span></p>
+          </div>
+        </div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <BookOpen className="h-5 w-5 text-primary" />
@@ -264,6 +271,7 @@ export default function HomePage() {
             ))}
           </div>
         )}
+        <div className="shelf-ledge" />
       </section>
 
       {/* Trending by Platform */}
@@ -295,6 +303,7 @@ export default function HomePage() {
                 </motion.div>
               ))}
             </div>
+            <div className="shelf-ledge" />
           </section>
         );
       })}

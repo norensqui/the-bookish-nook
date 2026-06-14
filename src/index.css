@@ -101,6 +101,15 @@
     box-shadow: 0 12px 36px -16px hsl(182 18% 24% / 0.22);
   }
 
+  /* Decorative wooden shelf ledge that sits under a row of books */
+  .shelf-ledge {
+    height: 12px;
+    margin-top: 0.6rem;
+    border-radius: 3px;
+    background: linear-gradient(to bottom, hsl(var(--sand)), hsl(var(--sand) / 0.5));
+    box-shadow: 0 9px 16px -9px hsl(var(--foreground) / 0.4);
+  }
+
   .book-card-hover {
     @apply transition-all duration-300 ease-out;
   }
