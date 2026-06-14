@@ -88,75 +88,60 @@ export function EmptyShelfArt({ className = '' }: { className?: string }) {
   );
 }
 
-type MotifType = 'book' | 'stack' | 'sprig' | 'sparkle' | 'flower';
-
-function Motif({ type }: { type: MotifType }) {
-  switch (type) {
-    case 'book':
-      return (
-        <svg width="48" height="32" viewBox="0 0 48 32" fill="none">
-          <path d="M3 7 Q24 1 24 6 Q24 1 45 7 L45 26 Q24 19 24 24 Q24 19 3 26 Z" fill="hsl(var(--primary))" />
-          <path d="M24 6 V24" stroke="hsl(var(--card))" strokeWidth="1" opacity="0.6" />
-        </svg>
-      );
-    case 'stack':
-      return (
-        <svg width="42" height="34" viewBox="0 0 42 34" fill="none">
-          <rect x="5" y="24" width="32" height="8" rx="2" fill="hsl(var(--primary))" />
-          <rect x="8" y="15" width="28" height="8" rx="2" fill="hsl(var(--rose))" />
-          <rect x="4" y="6" width="30" height="8" rx="2" fill="hsl(var(--sage))" />
-        </svg>
-      );
-    case 'sprig':
-      return (
-        <svg width="26" height="36" viewBox="0 0 26 36" fill="none">
-          <path d="M13 36 V8" stroke="hsl(var(--primary))" strokeWidth="1.4" strokeLinecap="round" />
-          <path d="M13 19 C8 17 5 13 5 8 C11 10 13 14 13 19Z" fill="hsl(var(--sage))" />
-          <path d="M13 19 C18 17 21 13 21 8 C15 10 13 14 13 19Z" fill="hsl(var(--sage))" />
-        </svg>
-      );
-    case 'sparkle':
-      return (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 0 l2 8 8 2 -8 2 -2 8 -2 -8 -8 -2 8 -2Z" fill="hsl(var(--accent))" />
-        </svg>
-      );
-    case 'flower':
-      return (
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-          <circle cx="13" cy="6" r="3.6" fill="hsl(var(--rose))" />
-          <circle cx="20" cy="13" r="3.6" fill="hsl(var(--rose))" />
-          <circle cx="13" cy="20" r="3.6" fill="hsl(var(--rose))" />
-          <circle cx="6" cy="13" r="3.6" fill="hsl(var(--rose))" />
-          <circle cx="13" cy="13" r="3" fill="hsl(var(--accent))" />
-        </svg>
-      );
-  }
-}
-
-const BACKDROP: { x: string; y: string; r: number; type: MotifType }[] = [
-  { x: '4%', y: '11%', r: -10, type: 'book' },
-  { x: '90%', y: '8%', r: 8, type: 'stack' },
-  { x: '79%', y: '29%', r: -6, type: 'sprig' },
-  { x: '9%', y: '40%', r: 6, type: 'flower' },
-  { x: '94%', y: '50%', r: 0, type: 'sparkle' },
-  { x: '3%', y: '70%', r: -8, type: 'stack' },
-  { x: '88%', y: '74%', r: 10, type: 'book' },
-  { x: '46%', y: '5%', r: 0, type: 'sparkle' },
-  { x: '64%', y: '90%', r: -6, type: 'sprig' },
-  { x: '20%', y: '90%', r: 8, type: 'flower' },
-  { x: '32%', y: '22%', r: 0, type: 'sparkle' },
-  { x: '72%', y: '60%', r: -8, type: 'flower' },
-];
-
+// ---- Bookish wallpaper: an original repeating pattern behind every page ----
 export function PageBackdrop() {
   return (
-    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      {BACKDROP.map((m, i) => (
-        <div key={i} className="absolute opacity-[0.45]" style={{ left: m.x, top: m.y, transform: `rotate(${m.r}deg) scale(1.3)` }}>
-          <Motif type={m.type} />
-        </div>
-      ))}
-    </div>
+    <svg
+      className="pointer-events-none fixed inset-0 -z-10 h-full w-full"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <pattern id="folio-wallpaper" width="300" height="270" patternUnits="userSpaceOnUse">
+          <g transform="translate(16,32) scale(1.15)" opacity="0.7">
+            <path d="M0 7 Q22 1 22 6 Q22 1 44 7 L44 26 Q22 19 22 24 Q22 19 0 26 Z" fill="hsl(var(--primary))" />
+            <path d="M22 6 V24" stroke="hsl(var(--card))" strokeWidth="1" />
+          </g>
+          <g transform="translate(198,20)" opacity="0.7">
+            <rect x="0" y="24" width="42" height="9" rx="2" fill="hsl(var(--primary))" />
+            <rect x="4" y="14" width="36" height="9" rx="2" fill="hsl(var(--rose))" />
+            <rect x="1" y="4" width="38" height="9" rx="2" fill="hsl(var(--sage))" />
+          </g>
+          <g transform="translate(126,26)" opacity="0.55">
+            <rect x="0" y="0" width="18" height="24" rx="2" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.4" />
+            <path d="M4 6 H14 M4 11 H14 M4 16 H11" stroke="hsl(var(--primary))" strokeWidth="1" />
+          </g>
+          <g transform="translate(150,104)" opacity="0.6">
+            <path d="M6 46 V6" stroke="hsl(var(--primary))" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M6 24 C0 21 -2 15 -2 9 C5 12 6 18 6 24Z" fill="hsl(var(--sage))" />
+            <path d="M6 18 C12 15 15 10 15 4 C8 7 6 12 6 18Z" fill="hsl(var(--sage))" />
+          </g>
+          <g transform="translate(34,170)" opacity="0.6">
+            <path d="M14 50 L5 14 M14 50 L14 12 M14 50 L23 14" stroke="hsl(var(--primary))" strokeWidth="1.2" />
+            <path d="M8 50 H20" stroke="hsl(var(--primary))" strokeWidth="1.6" strokeLinecap="round" />
+            <circle cx="5" cy="12" r="3" fill="hsl(var(--rose))" />
+            <circle cx="14" cy="10" r="3" fill="hsl(var(--accent))" />
+            <circle cx="23" cy="12" r="3" fill="hsl(var(--rose))" />
+          </g>
+          <g transform="translate(244,150)" opacity="0.6">
+            <circle cx="10" cy="3" r="3.2" fill="hsl(var(--rose))" />
+            <circle cx="17" cy="10" r="3.2" fill="hsl(var(--rose))" />
+            <circle cx="10" cy="17" r="3.2" fill="hsl(var(--rose))" />
+            <circle cx="3" cy="10" r="3.2" fill="hsl(var(--rose))" />
+            <circle cx="10" cy="10" r="2.6" fill="hsl(var(--accent))" />
+          </g>
+          <g transform="translate(206,196) scale(0.85)" opacity="0.6">
+            <path d="M0 7 Q22 1 22 6 Q22 1 44 7 L44 26 Q22 19 22 24 Q22 19 0 26 Z" fill="hsl(var(--sage))" />
+            <path d="M22 6 V24" stroke="hsl(var(--card))" strokeWidth="1" />
+          </g>
+          <circle cx="100" cy="150" r="2" fill="hsl(var(--accent))" opacity="0.7" />
+          <circle cx="272" cy="64" r="2" fill="hsl(var(--accent))" opacity="0.7" />
+          <circle cx="74" cy="250" r="2" fill="hsl(var(--sage))" opacity="0.7" />
+          <circle cx="160" cy="220" r="2.4" fill="hsl(var(--rose))" opacity="0.6" />
+          <circle cx="120" cy="120" r="1.6" fill="hsl(var(--primary))" opacity="0.4" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#folio-wallpaper)" opacity="0.6" />
+    </svg>
   );
 }
