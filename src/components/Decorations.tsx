@@ -82,7 +82,7 @@ export function PageBackdrop() {
         </filter>
 
         <pattern id="folio-wallpaper" width="360" height="330" patternUnits="userSpaceOnUse" patternTransform="rotate(-2)">
-          <g filter="url(#folio-ink)" fill="none" stroke="hsl(var(--foreground))" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+          <g filter="url(#folio-ink)" fill="none" stroke="hsl(var(--muted-foreground))" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round">
             <g transform="translate(14,30)">
               <path d="M1 9 Q21 3 23 8 Q25 3 45 9 L45 31 Q25 25 23 30 Q25 25 1 31 Z" />
               <path d="M23 8 V30" />
@@ -146,7 +146,7 @@ export function PageBackdrop() {
         </symbol>
       </defs>
 
-      <rect width="100%" height="100%" fill="url(#folio-wallpaper)" opacity="0.26" />
+      <rect width="100%" height="100%" fill="url(#folio-wallpaper)" opacity="0.15" />
 
       <use href="#folio-cat" x="86%" y="32%" width="170" height="128" opacity="0.5" />
       <use href="#folio-cat" x="0%" y="70%" width="170" height="128" opacity="0.45" />
