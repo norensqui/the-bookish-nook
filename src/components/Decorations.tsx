@@ -153,7 +153,7 @@ export function PageBackdrop() {
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
       {BACKDROP.map((m, i) => (
-        <div key={i} className="absolute opacity-[0.22]" style={{ left: m.x, top: m.y, transform: `rotate(${m.r}deg)` }}>
+        <div key={i} className="absolute opacity-[0.45]" style={{ left: m.x, top: m.y, transform: `rotate(${m.r}deg) scale(1.3)` }}>
           <Motif type={m.type} />
         </div>
       ))}
