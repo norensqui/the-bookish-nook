@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useBooks } from '@/context/BookContext';
 import { useSettings } from '@/context/SettingsContext';
+import { EmptyShelfArt } from '@/components/Decorations';
 import { BookCard } from '@/components/BookCard';
 import { Book, getMoodQuote, genres } from '@/data/seedData';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -324,9 +325,9 @@ export default function LibraryPage() {
           {/* Book Grid */}
           {filteredBooks.length === 0 ? (
             <div className="glass-card p-12 text-center">
-              <BookOpen className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-              <h3 className="font-display text-lg text-foreground">No books here yet</h3>
-              <p className="text-sm text-muted-foreground mt-1">Add your first book to get started!</p>
+              <EmptyShelfArt className="h-24 w-32 mx-auto mb-3 text-primary" />
+              <h3 className="font-display text-lg text-foreground">Your shelf is waiting</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">Add a book or search the catalog — your next favorite read starts here.</p>
             </div>
           ) : (
             <div className={`grid ${gridColsClass} gap-4`}>

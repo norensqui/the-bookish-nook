@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, memo } from 'react';
 import { Star, Heart, Quote, BookOpen } from 'lucide-react';
 import { TrendingBook } from '@/data/seedData';
 import { motion } from 'framer-motion';
@@ -124,8 +124,8 @@ export function BookCover({
     }
 
     const controller = new AbortController();
-    // Don't let a slow/blocked request hang forever — give up after 7s.
-    const timeout = setTimeout(() => controller.abort(), 7000);
+    // Fail over to the fallback quickly so the UI never feels stuck.
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
     async function fetchCover() {
       try {
@@ -191,6 +191,7 @@ export function BookCover({
             src={resolvedCover}
             alt={title}
             loading="lazy"
+            decoding="async"
             className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImgLoaded(true)}
             onError={() => setStatus('failed')}
@@ -303,7 +304,7 @@ export function BookCard({
   );
 }
 
-export function TrendingBookCard({
+export const TrendingBookCard = memo(function TrendingBookCard({
   book,
   onClick,
 }: {
@@ -322,4 +323,4 @@ export function TrendingBookCard({
       onClick={onClick}
     />
   );
-}
+});

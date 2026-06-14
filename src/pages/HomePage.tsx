@@ -115,7 +115,7 @@ export default function HomePage() {
         );
         const startIndex = (dayOfYear * 5) % 40;
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 7000);
+        const timeout = setTimeout(() => controller.abort(), 4500);
         const res = await fetch(
           `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&orderBy=newest&startIndex=${startIndex}&maxResults=10`,
           { signal: controller.signal }

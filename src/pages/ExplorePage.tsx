@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { creatorPicks, exploreArticles } from '@/data/seedData';
 import { BookCover } from '@/components/BookCard';
-import { motion } from 'framer-motion';
-import { Compass, ExternalLink, Sparkles, Newspaper, Youtube, Instagram } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Compass, ExternalLink, Sparkles, Newspaper } from 'lucide-react';
 
 const categories = ['All', 'Author Interviews', 'Literary Essays', 'Book Reviews', 'Book Recommendations', 'Literary News'];
 
@@ -13,14 +13,12 @@ const platformColors: Record<string, string> = {
   Blog: 'bg-sage/30 text-sage-foreground',
 };
 
-// Initials from a source name, e.g. "The New Yorker" -> "NY", "Literary Hub" -> "LH"
 function getInitials(name: string) {
   const words = name.replace(/^The\s+/i, '').split(/\s+/).filter(Boolean);
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-// Soft palette-consistent avatar tints, rotated per card.
 const avatarTints = [
   'bg-accent/50 text-accent-foreground',
   'bg-sage/50 text-sage-foreground',
@@ -28,7 +26,13 @@ const avatarTints = [
   'bg-rose/50 text-rose-foreground',
 ];
 
+const tabs = [
+  { id: 'articles' as const, label: 'Articles', icon: Newspaper },
+  { id: 'creators' as const, label: 'Creator Picks', icon: Sparkles },
+];
+
 export default function ExplorePage() {
+  const [view, setView] = useState<'articles' | 'creators'>('articles');
   const [activeCategory, setActiveCategory] = useState('All');
 
   const filtered = activeCategory === 'All'
@@ -45,120 +49,148 @@ export default function ExplorePage() {
         <p className="text-sm text-muted-foreground mb-6">Discover book-related articles, interviews, and recommendations</p>
       </motion.div>
 
-      {/* Top Articles */}
-      <section className="mb-14">
-        <div className="flex items-center gap-2 mb-4">
-          <Newspaper className="h-5 w-5 text-primary" />
-          <h2 className="section-title">Top Articles This Week</h2>
-        </div>
+      {/* View tabs with a sliding active indicator */}
+      <div className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/70 backdrop-blur-sm p-1 mb-7">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setView(tab.id)}
+            aria-pressed={view === tab.id}
+            className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              view === tab.id ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {view === tab.id && (
+              <motion.span
+                layoutId="exploreTab"
+                className="absolute inset-0 rounded-full bg-primary"
+                transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+              />
+            )}
+            <tab.icon className="relative h-4 w-4" />
+            <span className="relative">{tab.label}</span>
+          </button>
+        ))}
+      </div>
 
-        {/* Categories */}
-        <div className="flex gap-1.5 mb-6 flex-wrap">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-body transition-all clickable-card ${
-                activeCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      <AnimatePresence mode="wait">
+        {view === 'articles' ? (
+          <motion.section
+            key="articles"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="flex gap-1.5 mb-6 flex-wrap">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-3 py-1 rounded-full text-xs font-body transition-all clickable-card ${
+                    activeCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
 
-        {/* Articles — Substack-style feed */}
-        <div className="max-w-3xl space-y-3">
-          {filtered.map((article, i) => (
-            <motion.a
-              key={article.id}
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
-              className="glass-card group book-card-hover flex items-start gap-4 p-5 clickable-card"
-            >
-              <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-display text-sm font-semibold ${avatarTints[i % avatarTints.length]}`}>
-                {getInitials(article.source)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                  <span className="font-medium text-foreground/80">{article.source}</span>
-                  <span className="opacity-50">·</span>
-                  <span>{article.category}</span>
-                </div>
-                <h3 className="font-display text-lg font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                  {article.title}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{article.excerpt}</p>
-                <div className="flex items-center gap-1.5 mt-3 text-xs font-medium text-primary/80 group-hover:text-primary transition-colors">
-                  Read on {article.source}
-                  <ExternalLink className="h-3 w-3" />
-                </div>
-              </div>
-            </motion.a>
-          ))}
-        </div>
-      </section>
-
-      {/* Bookworm Creator Picks */}
-      <section>
-        <div className="flex items-center gap-2 mb-5">
-          <Sparkles className="h-5 w-5 text-primary" />
-          <h2 className="section-title">Bookworm Creator Picks</h2>
-        </div>
-        <p className="text-sm text-muted-foreground mb-6">Curated recommendations from your favorite book creators</p>
-        <div className="grid gap-6 sm:grid-cols-2">
-          {creatorPicks.map((cp, ci) => (
-            <motion.div
-              key={cp.id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: ci * 0.08 }}
-              className="glass-card p-5 hover:shadow-lg transition-shadow duration-300"
-            >
-              <a
-                href={cp.profileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 mb-4 group/creator clickable-card"
-              >
-                <img
-                  src={cp.creatorAvatar}
-                  alt={cp.creator}
-                  loading="lazy"
-                  className="w-12 h-12 rounded-full object-cover border-2 border-border/50 group-hover/creator:border-primary transition-colors"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cp.creator)}&background=d4c5a9&color=3d3529&size=80`;
-                  }}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-display text-sm font-semibold text-foreground group-hover/creator:text-primary transition-colors">{cp.creator}</p>
-                    <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover/creator:opacity-100 transition-opacity" />
+            <div className="max-w-3xl space-y-3">
+              {filtered.map((article, i) => (
+                <motion.a
+                  key={article.id}
+                  href={article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.04, 0.3) }}
+                  className="glass-card group book-card-hover flex items-start gap-4 p-5 clickable-card"
+                >
+                  <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-display text-sm font-semibold ${avatarTints[i % avatarTints.length]}`}>
+                    {getInitials(article.source)}
                   </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-0.5 ${platformColors[cp.platform] || 'bg-secondary text-secondary-foreground'}`}>
-                    {cp.platform}
-                  </span>
-                </div>
-              </a>
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                {cp.books.map((book, bi) => (
-                  <div key={bi} className="w-[84px] flex-shrink-0 group/book" title={`${book.title} — "${book.reason}"`}>
-                    <div className="w-[84px] aspect-[2/3] overflow-hidden rounded-xl relative shadow-sm transition-transform duration-200 group-hover/book:-translate-y-0.5">
-                      <BookCover title={book.title} author={book.author} coverUrl={book.coverUrl} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                      <span className="font-medium text-foreground/80">{article.source}</span>
+                      <span className="opacity-50">·</span>
+                      <span>{article.category}</span>
                     </div>
-                    <h4 className="font-display text-[11px] font-semibold text-foreground mt-1.5 line-clamp-1 leading-tight">{book.title}</h4>
-                    <p className="text-[10px] text-muted-foreground line-clamp-1">{book.author}</p>
+                    <h3 className="font-display text-lg font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                      {article.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{article.excerpt}</p>
+                    <div className="flex items-center gap-1.5 mt-3 text-xs font-medium text-primary/80 group-hover:text-primary transition-colors">
+                      Read on {article.source}
+                      <ExternalLink className="h-3 w-3" />
+                    </div>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+                </motion.a>
+              ))}
+            </div>
+          </motion.section>
+        ) : (
+          <motion.section
+            key="creators"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="text-sm text-muted-foreground mb-6">Curated recommendations from your favorite book creators</p>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {creatorPicks.map((cp, ci) => (
+                <motion.div
+                  key={cp.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(ci * 0.06, 0.4) }}
+                  className="glass-card p-5 hover:shadow-lg transition-shadow duration-300"
+                >
+                  <a
+                    href={cp.profileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 mb-4 group/creator clickable-card"
+                  >
+                    <img
+                      src={cp.creatorAvatar}
+                      alt={cp.creator}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-border/50 group-hover/creator:border-primary transition-colors"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cp.creator)}&background=d4c5a9&color=3d3529&size=80`;
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-display text-sm font-semibold text-foreground group-hover/creator:text-primary transition-colors">{cp.creator}</p>
+                        <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover/creator:opacity-100 transition-opacity" />
+                      </div>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-0.5 ${platformColors[cp.platform] || 'bg-secondary text-secondary-foreground'}`}>
+                        {cp.platform}
+                      </span>
+                    </div>
+                  </a>
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    {cp.books.map((book, bi) => (
+                      <div key={bi} className="w-[84px] flex-shrink-0 group/book" title={`${book.title} — "${book.reason}"`}>
+                        <div className="w-[84px] aspect-[2/3] overflow-hidden rounded-xl relative shadow-sm transition-transform duration-200 group-hover/book:-translate-y-0.5">
+                          <BookCover title={book.title} author={book.author} coverUrl={book.coverUrl} />
+                        </div>
+                        <h4 className="font-display text-[11px] font-semibold text-foreground mt-1.5 line-clamp-1 leading-tight">{book.title}</h4>
+                        <p className="text-[10px] text-muted-foreground line-clamp-1">{book.author}</p>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
