@@ -1,4 +1,4 @@
-import { Home, Compass, BookOpen, Settings, BookMarked, Film, BarChart3 } from 'lucide-react';
+import { Home, Compass, BookOpen, Settings, BookMarked, Film, BarChart3, Sprout } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -16,6 +16,7 @@ const mainNav = [
   { title: 'Home', url: '/', icon: Home },
   { title: 'Explore', url: '/explore', icon: Compass },
   { title: 'My Library', url: '/library', icon: BookOpen },
+  { title: 'Focus', url: '/focus', icon: Sprout },
   { title: 'Movies', url: '/movies', icon: Film },
 ];
 
