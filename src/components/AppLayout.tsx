@@ -1,13 +1,10 @@
 import { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { ThemeToggle } from './ThemeToggle';
 import { PageBackdrop } from './Decorations';
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const location = useLocation();
   return (
     <SidebarProvider>
       <PageBackdrop />
@@ -19,18 +16,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <ThemeToggle />
           </header>
           <main className="flex-1 overflow-auto">
-            {/* Smooth flow animation on open and when switching tabs */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {children}
-              </motion.div>
-            </AnimatePresence>
+            {children}
           </main>
         </div>
       </div>
