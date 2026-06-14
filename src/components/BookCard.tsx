@@ -65,8 +65,33 @@ export function BookCover({
   // 'loading' while we resolve a cover, 'ready' once we have one, 'failed' if none.
   const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>('loading');
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [inView, setInView] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const onResolvedRef = useRef(onResolved);
   onResolvedRef.current = onResolved;
+
+  // Only fetch a cover once the card is near the viewport — this staggers
+  // requests as the user scrolls instead of firing dozens at once on load,
+  // which avoids rate-limiting from the cover API.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(e => e.isIntersecting)) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     setImgLoaded(false);
@@ -87,6 +112,12 @@ export function BookCover({
       setResolvedCover(cached);
       setStatus('ready');
       onResolvedRef.current?.(cached);
+      return;
+    }
+
+    // Defer the network lookup until the card scrolls into view.
+    if (!inView) {
+      setStatus('loading');
       return;
     }
 
@@ -141,30 +172,30 @@ export function BookCover({
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [title, author, coverUrl]);
-
-  if (status === 'failed') {
-    return <CoverFallback title={title} author={author} />;
-  }
-
-  if (status === 'loading') {
-    return <Skeleton className="absolute inset-0 w-full h-full rounded-lg" />;
-  }
+  }, [title, author, coverUrl, inView]);
 
   return (
-    <>
-      {!imgLoaded && (
-        <Skeleton className="absolute inset-0 w-full h-full rounded-lg z-10" />
+    <div ref={containerRef} className="absolute inset-0">
+      {status === 'failed' ? (
+        <CoverFallback title={title} author={author} />
+      ) : status === 'loading' ? (
+        <Skeleton className="absolute inset-0 w-full h-full rounded-lg" />
+      ) : (
+        <>
+          {!imgLoaded && (
+            <Skeleton className="absolute inset-0 w-full h-full rounded-lg z-10" />
+          )}
+          <img
+            src={resolvedCover}
+            alt={title}
+            loading="lazy"
+            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setStatus('failed')}
+          />
+        </>
       )}
-      <img
-        src={resolvedCover}
-        alt={title}
-        loading="lazy"
-        className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-        onLoad={() => setImgLoaded(true)}
-        onError={() => setStatus('failed')}
-      />
-    </>
+    </div>
   );
 }
 

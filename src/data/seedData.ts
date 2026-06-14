@@ -208,11 +208,11 @@ export const moodRecommendations: Record<string, TrendingBook[]> = {
 };
 
 export const weeklyRecommendations: TrendingBook[] = [
-  { id: 'wr1', title: 'Intermezzo', author: 'Sally Rooney', coverUrl: '', reason: 'Rooney\'s most mature work yet', platform: 'weekly', genre: 'Literary Fiction', goodreadsRating: 4.08 },
-  { id: 'wr2', title: 'The Women', author: 'Kristin Hannah', coverUrl: '', reason: 'Epic and deeply moving', platform: 'weekly', genre: 'Historical Fiction', goodreadsRating: 4.61 },
-  { id: 'wr3', title: 'James', author: 'Percival Everett', coverUrl: '', reason: 'A stunning reimagining', platform: 'weekly', genre: 'Literary Fiction', goodreadsRating: 4.35 },
-  { id: 'wr4', title: 'Onyx Storm', author: 'Rebecca Yarros', coverUrl: '', reason: 'The fantasy event of the year', platform: 'weekly', genre: 'Fantasy', goodreadsRating: 4.20 },
-  { id: 'wr5', title: 'We Solve Murders', author: 'Richard Osman', coverUrl: '', reason: 'Witty and endlessly fun', platform: 'weekly', genre: 'Mystery', goodreadsRating: 4.10 },
+  { id: 'wr1', title: 'Intermezzo', author: 'Sally Rooney', coverUrl: 'https://covers.openlibrary.org/b/id/14836043-L.jpg', reason: 'Rooney\'s most mature work yet', platform: 'weekly', genre: 'Literary Fiction', goodreadsRating: 4.08 },
+  { id: 'wr2', title: 'The Women', author: 'Kristin Hannah', coverUrl: 'https://covers.openlibrary.org/b/id/8314147-L.jpg', reason: 'Epic and deeply moving', platform: 'weekly', genre: 'Historical Fiction', goodreadsRating: 4.61 },
+  { id: 'wr3', title: 'James', author: 'Percival Everett', coverUrl: 'https://covers.openlibrary.org/b/id/15094964-L.jpg', reason: 'A stunning reimagining', platform: 'weekly', genre: 'Literary Fiction', goodreadsRating: 4.35 },
+  { id: 'wr4', title: 'Onyx Storm', author: 'Rebecca Yarros', coverUrl: 'https://covers.openlibrary.org/b/id/14826089-L.jpg', reason: 'The fantasy event of the year', platform: 'weekly', genre: 'Fantasy', goodreadsRating: 4.20 },
+  { id: 'wr5', title: 'We Solve Murders', author: 'Richard Osman', coverUrl: 'https://covers.openlibrary.org/b/id/14815421-L.jpg', reason: 'Witty and endlessly fun', platform: 'weekly', genre: 'Mystery', goodreadsRating: 4.10 },
 ];
 
 export const moodQuotes: Record<string, string[]> = {
