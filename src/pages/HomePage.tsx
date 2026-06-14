@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSettings } from '@/context/SettingsContext';
+import { BookStackArt, SprigDivider } from '@/components/Decorations';
 
 const platformIcons: Record<string, { label: string; color: string }> = {
   tiktok: { label: 'TikTok', color: 'bg-rose' },
@@ -49,8 +50,9 @@ function writeDailyCache<T>(key: string, data: T) {
 
 export default function HomePage() {
   const { settings } = useSettings();
-  const [weeklyTopBooks, setWeeklyTopBooks] = useState<TrendingBook[]>([]);
-  const [isLoadingTopBooks, setIsLoadingTopBooks] = useState(true);
+  // Start with curated picks so the section renders instantly, then refine from the API.
+  const [weeklyTopBooks, setWeeklyTopBooks] = useState<TrendingBook[]>(weeklyRecommendations);
+  const [isLoadingTopBooks, setIsLoadingTopBooks] = useState(false);
   const [selectedBook, setSelectedBook] = useState<TrendingBook | null>(null);
   const [genreFilter, setGenreFilter] = useState('All');
   const [selectedMood, setSelectedMood] = useState<string | null>(() => {
@@ -73,16 +75,16 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchWeeklyTopBooks() {
       try {
-        setIsLoadingTopBooks(true);
-
         // Serve same-day cached picks instantly; only hit the API once per day per genre.
         const cacheKey = `bookish_weekly_${genreFilter}`;
         const cached = readDailyCache<TrendingBook[]>(cacheKey);
         if (cached && cached.length > 0) {
           setWeeklyTopBooks(cached);
-          setIsLoadingTopBooks(false);
           return;
         }
+
+        // Show curated picks for this genre right away, then refine from the API in the background.
+        setWeeklyTopBooks(filterByGenre(weeklyRecommendations));
 
         let query = 'subject:fiction';
         if (genreFilter !== 'All') {
@@ -213,6 +215,7 @@ export default function HomePage() {
             <p className="font-display text-xs text-foreground/75 leading-tight">chapter <span className="text-accent-foreground">♥</span></p>
           </div>
         </div>
+        <BookStackArt className="hidden md:block absolute bottom-0 right-8 w-32 h-32 opacity-95 pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <BookOpen className="h-5 w-5 text-primary" />
@@ -308,6 +311,8 @@ export default function HomePage() {
         );
       })}
 
+      <SprigDivider />
+
       {/* Mood / Vibe Picker */}
       <section>
         <div className="flex items-center gap-2 mb-2">
@@ -366,6 +371,8 @@ export default function HomePage() {
           )}
         </AnimatePresence>
       </section>
+
+      <SprigDivider />
 
       {/* Weekly Recommendations */}
       <section>
