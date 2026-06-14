@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { ThemeToggle } from './ThemeToggle';
+import { PageBackdrop } from './Decorations';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   return (
     <SidebarProvider>
+      <PageBackdrop />
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">

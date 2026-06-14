@@ -87,3 +87,76 @@ export function EmptyShelfArt({ className = '' }: { className?: string }) {
     </svg>
   );
 }
+
+type MotifType = 'book' | 'stack' | 'sprig' | 'sparkle' | 'flower';
+
+function Motif({ type }: { type: MotifType }) {
+  switch (type) {
+    case 'book':
+      return (
+        <svg width="48" height="32" viewBox="0 0 48 32" fill="none">
+          <path d="M3 7 Q24 1 24 6 Q24 1 45 7 L45 26 Q24 19 24 24 Q24 19 3 26 Z" fill="hsl(var(--primary))" />
+          <path d="M24 6 V24" stroke="hsl(var(--card))" strokeWidth="1" opacity="0.6" />
+        </svg>
+      );
+    case 'stack':
+      return (
+        <svg width="42" height="34" viewBox="0 0 42 34" fill="none">
+          <rect x="5" y="24" width="32" height="8" rx="2" fill="hsl(var(--primary))" />
+          <rect x="8" y="15" width="28" height="8" rx="2" fill="hsl(var(--rose))" />
+          <rect x="4" y="6" width="30" height="8" rx="2" fill="hsl(var(--sage))" />
+        </svg>
+      );
+    case 'sprig':
+      return (
+        <svg width="26" height="36" viewBox="0 0 26 36" fill="none">
+          <path d="M13 36 V8" stroke="hsl(var(--primary))" strokeWidth="1.4" strokeLinecap="round" />
+          <path d="M13 19 C8 17 5 13 5 8 C11 10 13 14 13 19Z" fill="hsl(var(--sage))" />
+          <path d="M13 19 C18 17 21 13 21 8 C15 10 13 14 13 19Z" fill="hsl(var(--sage))" />
+        </svg>
+      );
+    case 'sparkle':
+      return (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 0 l2 8 8 2 -8 2 -2 8 -2 -8 -8 -2 8 -2Z" fill="hsl(var(--accent))" />
+        </svg>
+      );
+    case 'flower':
+      return (
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="6" r="3.6" fill="hsl(var(--rose))" />
+          <circle cx="20" cy="13" r="3.6" fill="hsl(var(--rose))" />
+          <circle cx="13" cy="20" r="3.6" fill="hsl(var(--rose))" />
+          <circle cx="6" cy="13" r="3.6" fill="hsl(var(--rose))" />
+          <circle cx="13" cy="13" r="3" fill="hsl(var(--accent))" />
+        </svg>
+      );
+  }
+}
+
+const BACKDROP: { x: string; y: string; r: number; type: MotifType }[] = [
+  { x: '4%', y: '11%', r: -10, type: 'book' },
+  { x: '90%', y: '8%', r: 8, type: 'stack' },
+  { x: '79%', y: '29%', r: -6, type: 'sprig' },
+  { x: '9%', y: '40%', r: 6, type: 'flower' },
+  { x: '94%', y: '50%', r: 0, type: 'sparkle' },
+  { x: '3%', y: '70%', r: -8, type: 'stack' },
+  { x: '88%', y: '74%', r: 10, type: 'book' },
+  { x: '46%', y: '5%', r: 0, type: 'sparkle' },
+  { x: '64%', y: '90%', r: -6, type: 'sprig' },
+  { x: '20%', y: '90%', r: 8, type: 'flower' },
+  { x: '32%', y: '22%', r: 0, type: 'sparkle' },
+  { x: '72%', y: '60%', r: -8, type: 'flower' },
+];
+
+export function PageBackdrop() {
+  return (
+    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+      {BACKDROP.map((m, i) => (
+        <div key={i} className="absolute opacity-[0.22]" style={{ left: m.x, top: m.y, transform: `rotate(${m.r}deg)` }}>
+          <Motif type={m.type} />
+        </div>
+      ))}
+    </div>
+  );
+}
