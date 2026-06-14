@@ -96,33 +96,63 @@ export const themes: ThemeDefinition[] = [
   },
 ];
 
+// 'system' follows the OS setting; 'light'/'dark' force a theme.
+export type ThemePreference = 'system' | 'light' | 'dark';
+
 interface ThemeContextType {
-  currentTheme: string;
-  setTheme: (id: string) => void;
+  currentTheme: ThemePreference; // the user's preference
+  resolvedTheme: 'light' | 'dark'; // what's actually applied
+  setTheme: (id: ThemePreference) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ currentTheme: 'light', setTheme: () => {} });
+const ThemeContext = createContext<ThemeContextType>({
+  currentTheme: 'system',
+  resolvedTheme: 'light',
+  setTheme: () => {},
+});
+
+const prefersDark = () =>
+  typeof window !== 'undefined' &&
+  !!window.matchMedia &&
+  window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [currentTheme, setCurrentTheme] = useState(() => {
+  const [currentTheme, setCurrentTheme] = useState<ThemePreference>(() => {
     const saved = localStorage.getItem('bookish_theme');
-    // Fall back to Light if an old (removed) theme id was stored.
-    return themes.some(t => t.id === saved) ? (saved as string) : 'light';
+    if (saved === 'system' || saved === 'light' || saved === 'dark') return saved;
+    return 'system';
   });
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() =>
+    currentTheme === 'system' ? (prefersDark() ? 'dark' : 'light') : currentTheme
+  );
 
   useEffect(() => {
-    const theme = themes.find(t => t.id === currentTheme) || themes[0];
-    const root = document.documentElement;
-    Object.entries(theme.vars).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-    // Toggle the `dark` class so Tailwind dark: utilities and components follow.
-    root.classList.toggle('dark', theme.id === 'dark');
-    localStorage.setItem('bookish_theme', theme.id);
+    const apply = () => {
+      const resolved: 'light' | 'dark' =
+        currentTheme === 'system' ? (prefersDark() ? 'dark' : 'light') : currentTheme;
+      setResolvedTheme(resolved);
+      const theme = themes.find(t => t.id === resolved) || themes[0];
+      const root = document.documentElement;
+      Object.entries(theme.vars).forEach(([key, value]) => {
+        root.style.setProperty(key, value);
+      });
+      // Toggle the `dark` class so Tailwind dark: utilities and components follow.
+      root.classList.toggle('dark', resolved === 'dark');
+    };
+
+    apply();
+    localStorage.setItem('bookish_theme', currentTheme);
+
+    // When following the system, react to OS theme changes live.
+    if (currentTheme === 'system' && typeof window !== 'undefined' && window.matchMedia) {
+      const mql = window.matchMedia('(prefers-color-scheme: dark)');
+      mql.addEventListener('change', apply);
+      return () => mql.removeEventListener('change', apply);
+    }
   }, [currentTheme]);
 
   return (
-    <ThemeContext.Provider value={{ currentTheme, setTheme: setCurrentTheme }}>
+    <ThemeContext.Provider value={{ currentTheme, resolvedTheme, setTheme: setCurrentTheme }}>
       {children}
     </ThemeContext.Provider>
   );

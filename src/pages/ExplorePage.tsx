@@ -45,8 +45,66 @@ export default function ExplorePage() {
         <p className="text-sm text-muted-foreground mb-6">Discover book-related articles, interviews, and recommendations</p>
       </motion.div>
 
+      {/* Top Articles */}
+      <section className="mb-14">
+        <div className="flex items-center gap-2 mb-4">
+          <Newspaper className="h-5 w-5 text-primary" />
+          <h2 className="section-title">Top Articles This Week</h2>
+        </div>
+
+        {/* Categories */}
+        <div className="flex gap-1.5 mb-6 flex-wrap">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-3 py-1 rounded-full text-xs font-body transition-all clickable-card ${
+                activeCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Articles — Substack-style feed */}
+        <div className="max-w-3xl space-y-3">
+          {filtered.map((article, i) => (
+            <motion.a
+              key={article.id}
+              href={article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="glass-card group book-card-hover flex items-start gap-4 p-5 clickable-card"
+            >
+              <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-display text-sm font-semibold ${avatarTints[i % avatarTints.length]}`}>
+                {getInitials(article.source)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                  <span className="font-medium text-foreground/80">{article.source}</span>
+                  <span className="opacity-50">·</span>
+                  <span>{article.category}</span>
+                </div>
+                <h3 className="font-display text-lg font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                  {article.title}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{article.excerpt}</p>
+                <div className="flex items-center gap-1.5 mt-3 text-xs font-medium text-primary/80 group-hover:text-primary transition-colors">
+                  Read on {article.source}
+                  <ExternalLink className="h-3 w-3" />
+                </div>
+              </div>
+            </motion.a>
+          ))}
+        </div>
+      </section>
+
       {/* Bookworm Creator Picks */}
-      <section className="mb-12">
+      <section>
         <div className="flex items-center gap-2 mb-5">
           <Sparkles className="h-5 w-5 text-primary" />
           <h2 className="section-title">Bookworm Creator Picks</h2>
@@ -101,62 +159,6 @@ export default function ExplorePage() {
           ))}
         </div>
       </section>
-
-      {/* Top Articles */}
-      <div className="flex items-center gap-2 mb-4">
-        <Newspaper className="h-5 w-5 text-primary" />
-        <h2 className="section-title">Top Articles This Week</h2>
-      </div>
-
-      {/* Categories */}
-      <div className="flex gap-1.5 mb-6 flex-wrap">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-3 py-1 rounded-full text-xs font-body transition-all clickable-card ${
-              activeCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Articles — Substack-style feed */}
-      <div className="max-w-3xl space-y-3">
-        {filtered.map((article, i) => (
-          <motion.a
-            key={article.id}
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="glass-card group book-card-hover flex items-start gap-4 p-5 clickable-card"
-          >
-            <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-display text-sm font-semibold ${avatarTints[i % avatarTints.length]}`}>
-              {getInitials(article.source)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                <span className="font-medium text-foreground/80">{article.source}</span>
-                <span className="opacity-50">·</span>
-                <span>{article.category}</span>
-              </div>
-              <h3 className="font-display text-lg font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                {article.title}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">{article.excerpt}</p>
-              <div className="flex items-center gap-1.5 mt-3 text-xs font-medium text-primary/80 group-hover:text-primary transition-colors">
-                Read on {article.source}
-                <ExternalLink className="h-3 w-3" />
-              </div>
-            </div>
-          </motion.a>
-        ))}
-      </div>
     </div>
   );
 }

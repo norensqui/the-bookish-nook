@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { movieAdaptations, genres, MovieAdaptation } from '@/data/seedData';
 import { useBooks } from '@/context/BookContext';
 import { BookCover } from '@/components/BookCard';
@@ -10,28 +10,98 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 const moods = ['All', 'melancholic', 'heartwarming', 'nostalgic', 'glamorous', 'emotional', 'empowering', 'romantic', 'epic', 'dark', 'thrilling', 'inspiring'];
 const years = ['All', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2014', '2013', '2012', '2011', '2007', '2005', '2004', '2001', '1999', '1994', '1962'];
 
-function MoviePoster({ src, alt }: { src: string; alt: string }) {
-  const [hasError, setHasError] = useState(false);
+// Cache resolved poster URLs across the session.
+const moviePosterCache = new Map<string, string>();
 
-  if (hasError || !src || src.includes('unsplash.com')) {
-    return (
-      <div className="w-full aspect-[2/3] rounded-lg bg-muted/60 flex items-center justify-center border border-border/30">
-        <div className="text-center p-2">
-          <Film className="h-5 w-5 text-muted-foreground/40 mx-auto mb-1" />
-          <p className="text-[9px] text-muted-foreground font-medium">Poster unavailable</p>
-        </div>
-      </div>
+function MoviePoster({ title, year, src }: { title: string; year?: number; src?: string }) {
+  const seedValid = !!src && !src.includes('unsplash.com') && !!src.trim();
+  const [resolved, setResolved] = useState<string>(seedValid ? (src as string) : '');
+  const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>(seedValid ? 'ready' : 'loading');
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Fetch posters only as cards scroll near the viewport.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') { setInView(true); return; }
+    const obs = new IntersectionObserver(
+      entries => { if (entries.some(e => e.isIntersecting)) { setInView(true); obs.disconnect(); } },
+      { rootMargin: '900px' }
     );
-  }
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    setImgLoaded(false);
+    if (seedValid) { setResolved(src as string); setStatus('ready'); return; }
+    const key = `${title}::${year || ''}`;
+    const cached = moviePosterCache.get(key);
+    if (cached) { setResolved(cached); setStatus('ready'); return; }
+    if (!inView) { setStatus('loading'); return; }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 7000);
+    (async () => {
+      try {
+        // iTunes Search API - keyless movie artwork lookup.
+        const res = await fetch(
+          `https://itunes.apple.com/search?term=${encodeURIComponent(title)}&media=movie&limit=8`,
+          { signal: controller.signal }
+        );
+        const data = await res.json();
+        const results: any[] = data?.results || [];
+        let pick = results[0];
+        if (year) {
+          const match = results.find(r => (r.releaseDate || '').startsWith(String(year)));
+          if (match) pick = match;
+        }
+        const art: string | undefined = pick?.artworkUrl100;
+        if (art) {
+          const big = art.replace('100x100bb', '600x600bb');
+          moviePosterCache.set(key, big);
+          setResolved(big);
+          setStatus('ready');
+        } else {
+          setStatus('failed');
+        }
+      } catch {
+        setStatus('failed');
+      } finally {
+        clearTimeout(timeout);
+      }
+    })();
+    return () => { clearTimeout(timeout); controller.abort(); };
+  }, [title, year, src, inView, seedValid]);
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      loading="lazy"
-      className="w-full aspect-[2/3] object-cover rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
-      onError={() => setHasError(true)}
-    />
+    <div ref={ref} className="w-full aspect-[2/3] rounded-lg overflow-hidden relative">
+      {status === 'failed' ? (
+        <div className="absolute inset-0 flex flex-col justify-between p-3 bg-gradient-to-br from-secondary to-muted border-l-4 border-foreground/10">
+          <Film className="h-4 w-4 text-foreground/35" />
+          <div>
+            <p className="font-display text-xs font-semibold text-foreground/80 leading-snug line-clamp-3">{title}</p>
+            {year ? <p className="text-[10px] text-foreground/55 mt-0.5">{year}</p> : null}
+          </div>
+        </div>
+      ) : status === 'loading' ? (
+        <div className="absolute inset-0 bg-muted/60 animate-pulse" />
+      ) : (
+        <>
+          {!imgLoaded && <div className="absolute inset-0 bg-muted/60 animate-pulse" />}
+          <img
+            src={resolved}
+            alt={title}
+            loading="lazy"
+            className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-[1.02] ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setStatus('failed')}
+          />
+        </>
+      )}
+    </div>
   );
 }
 
@@ -128,7 +198,7 @@ export default function MoviesPage() {
                 <p className="text-[10px] text-muted-foreground text-center mt-1">Book</p>
               </div>
               <div className="w-20 shrink-0">
-                <MoviePoster src={movie.moviePosterUrl} alt={movie.movieTitle} />
+                <MoviePoster title={movie.movieTitle} year={movie.releaseYear} src={movie.moviePosterUrl} />
                 <p className="text-[10px] text-muted-foreground text-center mt-1">Movie</p>
               </div>
             </div>
@@ -175,7 +245,7 @@ export default function MoviesPage() {
                   <p className="text-[10px] text-muted-foreground text-center mt-1">Book</p>
                 </div>
                 <div className="w-24 shrink-0">
-                  <MoviePoster src={selectedMovie.moviePosterUrl} alt={selectedMovie.movieTitle} />
+                  <MoviePoster title={selectedMovie.movieTitle} year={selectedMovie.releaseYear} src={selectedMovie.moviePosterUrl} />
                   <p className="text-[10px] text-muted-foreground text-center mt-1">Movie</p>
                 </div>
                 <div className="flex-1 min-w-0">

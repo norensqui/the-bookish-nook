@@ -5,11 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { useTheme, themes } from '@/context/ThemeContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSettings } from '@/context/SettingsContext';
 
 export default function SettingsPage() {
-  const { currentTheme, setTheme } = useTheme();
   const { settings, updateSettings } = useSettings();
 
   return (
@@ -48,22 +47,9 @@ export default function SettingsPage() {
             <Palette className="h-4 w-4 text-primary" />
             <h2 className="font-display text-lg font-semibold">Theme</h2>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {themes.map(theme => (
-              <button
-                key={theme.id}
-                onClick={() => setTheme(theme.id)}
-                className={`flex items-center gap-3 p-4 rounded-xl transition-all clickable-card ${
-                  currentTheme === theme.id ? 'ring-2 ring-primary bg-secondary/40' : 'hover:bg-secondary/30'
-                }`}
-              >
-                <div
-                  className="w-9 h-9 rounded-full border border-border/50 shrink-0"
-                  style={{ background: theme.previewColor }}
-                />
-                <span className="text-sm font-medium text-foreground">{theme.label}</span>
-              </button>
-            ))}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <p className="text-sm text-muted-foreground">Choose how Folio looks - "System" follows your device setting.</p>
+            <ThemeToggle />
           </div>
         </section>
 

@@ -87,7 +87,9 @@ export function BookCover({
           observer.disconnect();
         }
       },
-      { rootMargin: '300px' }
+      // Generous margin so a full screenful loads right away on open,
+      // while content far below still waits until you scroll toward it.
+      { rootMargin: '900px' }
     );
     observer.observe(el);
     return () => observer.disconnect();

@@ -1,4 +1,4 @@
-import { Home, Compass, BookOpen, Settings, BookMarked, Film } from 'lucide-react';
+import { Home, Compass, BookOpen, Settings, BookMarked, Film, BarChart3 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -12,11 +12,15 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-const navItems = [
+const mainNav = [
   { title: 'Home', url: '/', icon: Home },
   { title: 'Explore', url: '/explore', icon: Compass },
   { title: 'My Library', url: '/library', icon: BookOpen },
   { title: 'Movies', url: '/movies', icon: Film },
+];
+
+const bottomNav = [
+  { title: 'Reading Stats', url: '/stats', icon: BarChart3 },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
@@ -40,12 +44,39 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {mainNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
                       end={item.url === '/'}
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-full text-muted-foreground hover:bg-secondary/60 transition-colors"
+                      activeClassName="bg-secondary text-foreground font-medium shadow-sm"
+                    >
+                      <item.icon className="h-5 w-5 shrink-0" />
+                      {!collapsed && <span className="font-body text-sm">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Pinned to the bottom: insights & settings */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            {!collapsed && (
+              <p className="px-4 mb-1 text-[10px] font-medium uppercase tracking-widest text-muted-foreground/70">
+                More
+              </p>
+            )}
+            <SidebarMenu>
+              {bottomNav.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
                       className="flex items-center gap-3 px-4 py-2.5 rounded-full text-muted-foreground hover:bg-secondary/60 transition-colors"
                       activeClassName="bg-secondary text-foreground font-medium shadow-sm"
                     >

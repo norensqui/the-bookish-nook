@@ -11,6 +11,7 @@ import HomePage from "./pages/HomePage";
 import LibraryPage from "./pages/LibraryPage";
 import ExplorePage from "./pages/ExplorePage";
 import MoviesPage from "./pages/MoviesPage";
+import StatsPage from "./pages/StatsPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
                 <Route path="/library" element={<LibraryPage />} />
                 <Route path="/explore" element={<ExplorePage />} />
                 <Route path="/movies" element={<MoviesPage />} />
+                <Route path="/stats" element={<StatsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
