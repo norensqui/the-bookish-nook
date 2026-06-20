@@ -5,6 +5,7 @@ import { useBooks } from '@/context/BookContext';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { PageBanner } from '@/components/PageBanner';
 
 const GOAL_KEY = 'bookish_reading_goal';
 
@@ -62,13 +63,12 @@ export default function StatsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <BarChart3 className="h-5 w-5 text-primary" />
-          <h1 className="font-display text-3xl font-bold text-foreground">Reading Stats</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">Your reading at a glance</p>
-      </motion.div>
+      <PageBanner
+        variant="shelf"
+        icon={BarChart3}
+        title="Reading Stats"
+        subtitle="Your reading at a glance"
+      />
 
       <section className="glass-card p-6 mb-8">
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">

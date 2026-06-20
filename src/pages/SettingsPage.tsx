@@ -7,19 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSettings } from '@/context/SettingsContext';
+import { PageBanner } from '@/components/PageBanner';
 
 export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center gap-2 mb-2">
-          <Settings className="h-5 w-5 text-primary" />
-          <h1 className="font-display text-3xl font-bold text-foreground">Settings</h1>
-        </div>
-        <p className="text-sm text-muted-foreground mb-8">Customize your Folio experience</p>
-      </motion.div>
+      <PageBanner
+        variant="botanical"
+        icon={Settings}
+        title="Settings"
+        subtitle="Customize your Folio experience"
+      />
 
       <div className="space-y-8">
         {/* Profile */}

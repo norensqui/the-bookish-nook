@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Square, Flame, Clock, Library, Timer, Trophy, BookOpen, Calendar } from 'lucide-react';
 import { useBooks } from '@/context/BookContext';
+import { PageBanner } from '@/components/PageBanner';
 
 const SESSIONS_KEY = 'bookish_focus_sessions';
 const ACTIVE_KEY = 'bookish_focus_active';
@@ -207,13 +208,12 @@ export default function FocusPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <Library className="h-5 w-5 text-primary" />
-          <h1 className="font-display text-3xl font-bold text-foreground">Focus Sessions</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">Settle in, read, and grow your little library</p>
-      </motion.div>
+      <PageBanner
+        variant="cozy"
+        icon={Library}
+        title="Focus Sessions"
+        subtitle="Settle in, read, and grow your little library"
+      />
 
       <div className="grid lg:grid-cols-5 gap-6">
         <section className="lg:col-span-3 glass-card p-6 sm:p-8 relative overflow-hidden">

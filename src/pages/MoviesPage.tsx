@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { PageBanner } from '@/components/PageBanner';
 import { movieAdaptations, genres, MovieAdaptation } from '@/data/seedData';
 import { useBooks } from '@/context/BookContext';
 import { BookCover } from '@/components/BookCard';
@@ -140,13 +141,12 @@ export default function MoviesPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center gap-2 mb-2">
-          <Film className="h-5 w-5 text-primary" />
-          <h1 className="font-display text-3xl font-bold text-foreground">Movies Adapted From Books</h1>
-        </div>
-        <p className="text-sm text-muted-foreground mb-6">Discover beloved books brought to screen · {movieAdaptations.length} adaptations</p>
-      </motion.div>
+      <PageBanner
+        variant="botanical"
+        icon={Film}
+        title="Movies Adapted From Books"
+        subtitle={`Discover beloved books brought to screen · ${movieAdaptations.length} adaptations`}
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-8">

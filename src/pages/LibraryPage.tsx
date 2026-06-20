@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useBooks } from '@/context/BookContext';
 import { useSettings } from '@/context/SettingsContext';
 import { EmptyShelfArt } from '@/components/Decorations';
+import { PageBanner } from '@/components/PageBanner';
 import { BookCard } from '@/components/BookCard';
 import { Book, getMoodQuote, genres } from '@/data/seedData';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -164,10 +165,7 @@ export default function LibraryPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-        <h1 className="font-display text-3xl font-bold text-foreground">My Library</h1>
-        <p className="text-sm text-muted-foreground mt-1">Your personal reading collection</p>
-      </motion.div>
+      <PageBanner variant="shelf" title="My Library" subtitle="Your personal reading collection" />
 
       {/* Stats summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
