@@ -4,6 +4,7 @@ import { BookCover } from '@/components/BookCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Compass, ExternalLink, Sparkles, Newspaper } from 'lucide-react';
 import { PageBanner } from '@/components/PageBanner';
+import exploreBanner from '@/assets/illustrations/botanical.jpg';
 
 const categories = ['All', 'Author Interviews', 'Literary Essays', 'Book Reviews', 'Book Recommendations', 'Literary News'];
 
@@ -43,7 +44,7 @@ export default function ExplorePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <PageBanner
-        variant="botanical"
+        image={exploreBanner}
         icon={Compass}
         title="Explore"
         subtitle="Discover book-related articles, interviews, and recommendations"

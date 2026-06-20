@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { PageBanner } from '@/components/PageBanner';
+import moviesBanner from '@/assets/illustrations/botanical.jpg';
 import { movieAdaptations, genres, MovieAdaptation } from '@/data/seedData';
 import { useBooks } from '@/context/BookContext';
 import { BookCover } from '@/components/BookCard';
@@ -142,7 +143,7 @@ export default function MoviesPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <PageBanner
-        variant="botanical"
+        image={moviesBanner}
         icon={Film}
         title="Movies Adapted From Books"
         subtitle={`Discover beloved books brought to screen · ${movieAdaptations.length} adaptations`}

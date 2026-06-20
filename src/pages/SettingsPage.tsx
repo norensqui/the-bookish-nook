@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useSettings } from '@/context/SettingsContext';
 import { PageBanner } from '@/components/PageBanner';
+import settingsBanner from '@/assets/illustrations/botanical.jpg';
 
 export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
@@ -15,7 +16,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
       <PageBanner
-        variant="botanical"
+        image={settingsBanner}
         icon={Settings}
         title="Settings"
         subtitle="Customize your Folio experience"

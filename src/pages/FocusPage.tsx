@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Square, Flame, Clock, Library, Timer, Trophy, BookOpen, Calendar } from 'lucide-react';
 import { useBooks } from '@/context/BookContext';
 import { PageBanner } from '@/components/PageBanner';
+import focusBanner from '@/assets/illustrations/cozy-nook.jpg';
 
 const SESSIONS_KEY = 'bookish_focus_sessions';
 const ACTIVE_KEY = 'bookish_focus_active';
@@ -209,7 +210,7 @@ export default function FocusPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
       <PageBanner
-        variant="cozy"
+        image={focusBanner}
         icon={Library}
         title="Focus Sessions"
         subtitle="Settle in, read, and grow your little library"

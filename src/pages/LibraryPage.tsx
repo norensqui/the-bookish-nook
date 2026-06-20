@@ -3,6 +3,7 @@ import { useBooks } from '@/context/BookContext';
 import { useSettings } from '@/context/SettingsContext';
 import { EmptyShelfArt } from '@/components/Decorations';
 import { PageBanner } from '@/components/PageBanner';
+import libraryBanner from '@/assets/illustrations/bookshelf.jpg';
 import { BookCard } from '@/components/BookCard';
 import { Book, getMoodQuote, genres } from '@/data/seedData';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -165,7 +166,7 @@ export default function LibraryPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* Header */}
-      <PageBanner variant="shelf" title="My Library" subtitle="Your personal reading collection" />
+      <PageBanner image={libraryBanner} title="My Library" subtitle="Your personal reading collection" />
 
       {/* Stats summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

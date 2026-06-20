@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { PageBanner } from '@/components/PageBanner';
+import statsBanner from '@/assets/illustrations/bookshelf.jpg';
 
 const GOAL_KEY = 'bookish_reading_goal';
 
@@ -64,7 +65,7 @@ export default function StatsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
       <PageBanner
-        variant="shelf"
+        image={statsBanner}
         icon={BarChart3}
         title="Reading Stats"
         subtitle="Your reading at a glance"
